@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springsecurity.system.dao.RoleDao">
+
+    <resultMap type="com.example.springsecurity.system.entity.Role" id="RoleMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="roleName" column="role_name" jdbcType="VARCHAR"/>
+        <result property="roleKey" column="role_key" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into spring_security.role(role_name, role_key)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.roleName}, #{entity.roleKey})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into spring_security.role(role_name, role_key)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.roleName}, #{entity.roleKey})
+        </foreach>
+        on duplicate key update
+        role_name = values(role_name) , role_key = values(role_key)
+    </insert>
+    <!--
+     根据用户id 查询权限标识
+    -->
+    <select id="selectRolePermissionByUserId" resultType="string">
+        SELECT r.role_key FROM role r,user_role ur WHERE r.id = ur.role_id AND ur.user_id = #{userId}
+    </select>
+
+</mapper>
+

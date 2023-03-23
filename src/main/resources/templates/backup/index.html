@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    <script type="text/javascript" src="../static/js/jquery.js"></script>
+    <script type="text/javascript" src="../static/js/main.js"></script>
+</head>
+<body>
+<style>
+
+</style>
+<div class="easyui-layout" >
+    <h1>这是学习springboot_security框架首页</h1>
+    <hr>
+    <a href="/toLogin">登录</a>
+    <a href="/logout">退出登录</a>
+    <span style="margin-left: 50px">当前登录用户：</span>
+    <span sec:authentication="name"></span>&nbsp;&nbsp;&nbsp;
+    <!--<span id="userName"></span>-->
+    <!--拥有的权限-->
+    <span style="margin-left: 50px">拥有的权限：</span>
+    <span sec:authentication="authorities"></span>
+    <hr>
+    <h2>功能列表(测试权限)</h2>
+    <a href="javascript:;" onclick="toUrl('/vip/vip1')">vip1</a><br>
+    <a href="javascript:;" onclick="toUrl('/vip/vip2')">vip2</a><br>
+    <a href="javascript:;" onclick="toUrl('/vip/vip3')">vip3</a><br>
+    <hr>
+    <span sec:authorize="hasAuthority('ROLE_vip1')">测试权限按钮显示</span>
+</div>
+</body>
+<script type="text/javascript">
+
+    $(function () {
+        //getUser(); //获取用户信息
+    })
+
+    function getUser() {
+        $.ajax({
+            url:'/getUserInfo',
+            type:'get',
+            success:function (res) {
+               var user = res.data;
+               var userName = "";
+               if(user != '' && user != undefined && user != null){
+                   userName = user.username;
+                   console.log(userName)
+                   $("#userName").text(userName);
+               }
+            }
+        })
+    }
+
+
+</script>
+</html>

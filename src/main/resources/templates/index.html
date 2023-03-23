@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<title>后台管理</title>
+		<link rel="stylesheet" href="../static/lib/element2.13.0/lib-master/theme-chalk/index.css" />
+		<link rel="stylesheet" href="../static/lib/web/web.css" />
+		<script src="../static/lib/vue/vue.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../static/lib/jquery-3.4.1/jquery-3.4.1.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../static/lib/element2.13.0/lib-master/index.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../static/lib/layer/layer.js"></script>
+		<script src="../static/lib/axios/dist/axios.js"></script>
+		<script src="../static/js/main.js"></script>
+	</head>
+	<body>
+		<div id="app" style="display: none;">
+			<!-- 左边 导航栏 -->
+			<div class="left-side" :style="{backgroundColor:webInfo.bg}">
+				<!-- 顶部盒子 显示系统名称 头像 欢迎 -->
+				<div class="left-top-box">
+					<div class="left-top-title" :style="{color:webInfo.textColorActive}"><span sec:authentication="name"></span></div>
+					<div class="left-top-avatar">
+						<img src="../static/img/head.jpg" />
+					</div>
+					<div class="left-top-welcome" :style="{color:webInfo.textColorActive}"><span sec:authentication="name"></span>欢迎您！</div>
+				</div>
+				<!-- 导航栏盒子-->
+				<div class="left-navs-box">
+					<div class="navs-inner-box">
+						<el-menu :default-active="id" class="navs-item-box" :background-color="webInfo.bg" :text-color="webInfo.textColor"
+						 :active-text-color="webInfo.textColorActive">
+							<el-menu-item @click="welTab" index="0">
+								<i class="el-icon-s-platform"></i>
+								<span slot="title">控制台</span>
+							</el-menu-item>
+							<div v-for="(item,index) in navs" :key="item.id">
+								<!-- 没有子选项 -->
+								<el-menu-item @click="openTabs(item)" v-if="!item.children" :index="item.id">
+									<i :class="item.icon"></i>
+									<span slot="title">{{item.title}}</span>
+								</el-menu-item>
+								<!-- 有子选项 -->
+								<el-submenu v-if="item.children" :index="item.id">
+									<template slot="title"><i :class="item.icon"></i>{{item.title}}</template>
+									<el-menu-item v-for="(item,index) in item.children" @click="openTabs(item)" :key="item.id" :index="item.id">
+										<i :class="item.icon"></i>
+										{{item.title}}
+									</el-menu-item>
+								</el-submenu>
+							</div>
+						</el-menu>
+					</div>
+				</div>
+			</div>
+			<!-- /左边 导航栏 -->
+
+			<!-- 右边区域 -->
+			<div class="right-box">
+				<!-- 顶部栏 -->
+				<div class="right-header">
+					<i @click="isShowNav" :class="showNav?'el-icon-s-fold':'el-icon-s-unfold'"></i>
+					<div class="header-right">
+						<el-tooltip content="系统公告" placement="bottom" effect="light">
+							<el-badge is-dot class="item"><i @click="notice" class="el-icon-bell"></i></el-badge>
+						</el-tooltip>
+						<el-avatar size="small" src="../static/img/head.jpg"></el-avatar>
+						<!--个人信息操作 -->
+						<el-dropdown :show-timeout=100 @command="personCommand">
+							<span class="el-dropdown-link">
+								<span sec:authentication="name"></span><i class="el-icon-arrow-down el-icon--right"></i>
+							</span>
+							<el-dropdown-menu slot="dropdown">
+								<el-dropdown-item command="center">个人中心</el-dropdown-item>
+								<el-dropdown-item command="base">基本资料</el-dropdown-item>
+								<el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+							</el-dropdown-menu>
+						</el-dropdown>
+					</div>
+
+				</div>
+				<!-- tab 标签栏 -->
+				<div class="right-tab-box">
+					<div class="tab-left" @click="tabsLeft"><a href="#"><i class="el-icon-arrow-left"></i></a></div>
+					<div class="tab-item-box">
+						<div class="tab-item-ul">
+							<div class="tab-item" @click="welTab" :class="welcome?'tab-item-active':'1'">
+								<i class="el-icon-s-platform  tab-item-icon"></i>
+								<div class="tab-item-text">控制台</div>
+							</div>
+							<div class="tab-item" @click="tabActive(item)" :id="item.id" :class="id==item.id?'tab-item-active':'1'" v-for="(item,index) in tabs">
+								<i class="tab-item-icon" :class="item.data.icon"></i>
+								<div class="tab-item-text">{{item.data.title}}</div>
+								<i @click.stop="tabClose(item)" class="el-icon-close tab-item-close"></i>
+							</div>
+						</div>
+					</div>
+					<div class="tab-right" @click="tabsRight"><a href="#"><i class="el-icon-arrow-right"></i></a></div>
+					<div class="tabs-close-box">
+						<el-dropdown @command="tabsCloseItem" :show-timeout=100>
+							<i class="el-icon-arrow-down"></i>
+							<el-dropdown-menu slot="dropdown">
+								<el-dropdown-item command="a">关闭当前标签页</el-dropdown-item>
+								<el-dropdown-item command="b">关闭其他标签页</el-dropdown-item>
+								<el-dropdown-item command="c">关闭所有标签页</el-dropdown-item>
+							</el-dropdown-menu>
+						</el-dropdown>
+					</div>
+				</div>
+				<!-- 内容区域 iframe -->
+				<div class="right-contain">
+					<iframe :src="'/system/welcome?token='+token" frameborder="0" scrolling="yes" width="100%" height="100%" v-show="welcome">
+					</iframe>
+					<template v-for="(item,index) in tabs">
+						<iframe :src="getMenuSrc(item)" frameborder="0" scrolling="yes" width="100%" height="100%" v-show="id==item.id">
+							<!--内容展示区域-->
+						</iframe>
+					</template>
+				</div>
+
+				<!-- 底部栏 -->
+				<!-- <div class="right-footer" :style="{backgroundColor:webInfo.bg}"><span>®{{footerText}}</span></div> -->
+			</div>
+			<!-- /右边区域 -->
+		</div>
+
+		<!-- 系统公告 -->
+		<div id="notice" style="display: none;" class="notice-box">
+			功能正在努力实现额...
+		</div>
+
+	</body>
+</html>
+<script src="../static/lib/web/web.js"></script>
+<script>
+
+    // index vue 实例
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            /*
+             *可修改的配置信息
+             */
+            adminName: config.name,
+            // 左侧导航栏
+            webInfo: {
+                bg: config.webInfo.bg,
+                // bg:'#4f74b4',
+                textColor: config.webInfo.textColor,
+                // textColorActive: "#ffd04b"
+                textColorActive: config.webInfo.textColorActive
+            },
+            activeIndex: config.activeIndex,
+            footerText: 'mq-admin',
+            /*
+             *不建议修改的配置信息
+             */
+            isCollapse: true,
+            welcome: true,
+            //navs: config.navs, //静态文件
+			navs:[],
+            showNav: true,
+            tabs: [],
+            id: '0',
+            i: 0,
+            isActive: 'tab-item-active',
+            loadOk: false,
+            item: '',
+            token:sessionStorage.getItem("token")
+        },
+		computed:{
+
+		},
+        watch: {
+            getTabsBoxWidth: function () {
+                // 判断边界
+                var tbox = $('.tab-item-box')
+            }
+        },
+        mounted() {
+           this.getMenuList();
+		},
+        methods: {
+            getMenuSrc(menu){
+                var src = menu.data.href + "?token="+this.token;
+                return  src;
+            },
+            isShowNav: function (e) { //隐藏显示左边导航栏
+                if (this.showNav) {
+                    $(".left-side").animate({ left: '-220px' }, "slow");
+                    $(".right-box").animate({ left: '0' }, "slow");
+                    this.showNav = !this.showNav
+                } else {
+                    $(".left-side").animate({ left: '0px' }, "slow");
+                    $(".right-box").animate({ left: '220px' }, "slow");
+                    this.showNav = !this.showNav
+                }
+            },
+            welTab: function () { //控制台 欢迎页面 tab事件
+                this.welcome = true
+                this.id = '0'
+                this.activeIndex = '0'
+                $('.tab-item-ul').css("left", 0)
+            },
+            openTabs: function (e) { //打开页面 加载显示tabs
+                console.log(e)
+                this.welcome = false
+                var tabs = this.tabs
+                if (this.tabs.length == 0) {
+                    this.tabs.push({ id: e.id, data: e })
+                    this.id = e.id
+                    this.item = e
+                    calWidth()
+                } else {
+                    var back = checkTab(e.id)
+                    if (back == 1) { //可以插入
+                        this.tabs.push({ id: e.id, data: e })
+                        this.id = e.id
+                        this.item = e
+                        calWidth()
+                    } else { //已打开
+                        this.id = e.id;
+                        this.item = e
+                        calTabWid(e.id)
+                    }
+                }
+            },
+            //点击tab显示页面 并改变颜色 调整距离
+            tabActive: function (e) {
+                this.welcome = false
+                this.id = e.id;
+                this.item = e.data
+                this.activeIndex = e.id
+                calTabWid(e.id)
+            },
+            //tabs关闭事件
+            tabClose: function (e) {
+                closeTabThis(e.id)
+            },
+            //tabs右移
+            tabsRight: function () {
+                var left = $('.tab-item-ul').position().left;
+                var tbox = $('.tab-item-box').width() //外边盒子距离长度
+                var ul = $('.tab-item-ul').width()
+                if (ul > tbox) {
+                    if (left < tbox - ul) {
+                        layer.tips('到最右边了', '.tab-right', { tips: 1 });
+                    } else {
+                        $('.tab-item-ul').css("left", -(ul - tbox))
+                    }
+                } else {
+                    layer.tips('到最右边了', '.tab-right', { tips: 1 });
+                }
+            },
+            //tabs左移
+            tabsLeft: function () {
+                var left = $('.tab-item-ul').position().left;
+                if (left >= 0) {
+                    layer.tips('到最左边了', '.tab-left', { tips: 1 });
+                } else if (left < -100) {
+                    $('.tab-item-ul').css("left", left + 100)
+                } else {
+                    $('.tab-item-ul').css("left", 0)
+                }
+            },
+            notice: function () { //公告
+                // layer.msg('公告')
+                layer.open({
+                    type: 1,
+                    title: '系统公告',
+                    content: $('#notice'),
+                    area: ['300px', 'auto'],
+                    btn: '知道啦',
+                    btnAlign: 'c' //按钮居中
+                });
+            },
+            // 关闭tab
+            tabsCloseItem: function (e) {
+                if (e == 'a') {
+                    // layer.msg('关闭当前')
+                    closeTabThis(this.id)
+                } else if (e == 'b') {
+                    // layer.msg('关闭其他')
+                    closeTabOther()
+                } else {
+                    // layer.msg('关闭所有')
+                    closeTabAll()
+                }
+            },
+            // 个人信息操作
+            personCommand(e){
+                switch(e){
+                    case 'center': this.$message("个人中心");break;
+                    case 'base': this.$message("基本资料");break;
+                    case 'logout':
+                        this.$confirm('确定退出登录吗?', '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                        }).then(() => {
+                            window.location.href="./pages/login/login.html"
+                        }).catch(() => {
+                            this.$message({  type: 'info', message: '已取消退出' });
+                        });
+                        break;
+                }
+            },
+            getMenuList(){
+                axios.get('/system/menu/list').then((res) => {
+                        if(res.data.code == '200'){
+                            this.navs = res.data.data;
+                            console.log(res.data.data)
+                        }else{
+                            this.$message.error(res.data.msg);
+                        }
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                        this.$message.error('系统错误');
+                    })
+
+                //可以的
+                /*$.ajax({
+					url:'/system/menu/list',
+					type:'post',
+                    //headers:{'token':sessionStorage.getItem("token")},
+					success:function (res) {
+						console.log(res)
+                    }
+				})*/
+            }
+        },
+
+    })
+</script>

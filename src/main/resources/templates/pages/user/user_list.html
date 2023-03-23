@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户列表</title>
+    <link rel="stylesheet" href="../static/lib/element2.13.0/lib-master/theme-chalk/index.css" />
+    <script src="../static/lib/vue/vue.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../static/lib/jquery-3.4.1/jquery-3.4.1.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../static/lib/element2.13.0/lib-master/index.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../static/lib/layer/layer.js"></script>
+    <script src="../static/lib/axios/dist/axios.js"></script>
+    <script src="../static/js/main.js"></script>
+</head>
+<body>
+<div id="main">
+    <!--条件-->
+    <el-form :inline="true" :model="query" class="demo-form-inline">
+        <el-form-item label="账号">
+            <el-input v-model="query.username" placeholder="用户名"></el-input>
+        </el-form-item>
+        <el-form-item label="昵称">
+            <el-input v-model="query.nickName" placeholder="昵称"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="getUserList">查询</el-button>
+        </el-form-item>
+    </el-form>
+    <!--按钮-->
+    <el-row>
+        <el-button type="primary" plain icon="el-icon-plus" @click="openUserDialog">新增</el-button>
+        <el-button type="danger" plain  icon="el-icon-delete" @click="deleteUser">删除</el-button>
+    </el-row>
+    <!--表单-->
+    <el-table
+            ref="multipleTable"
+            :data="tableData"
+            border
+            style="width: 100%;margin-top: 5px"
+            @selection-change="handleSelectionChange"
+            v-loading="loading"
+    >
+        <el-table-column
+                prop="id"
+                type="selection"
+                width="55"
+        >
+        </el-table-column>
+        <el-table-column
+                fixed
+                prop="username"
+                label="账号"
+                width="150">
+        </el-table-column>
+        <el-table-column
+                prop="nickName"
+                label="昵称"
+                width="120">
+        </el-table-column>
+        <el-table-column
+                prop="phone"
+                label="手机号码"
+                width="120">
+        </el-table-column>
+        <el-table-column
+                prop="sex"
+                label="性别"
+                width="120"
+                :formatter="table_sex_formatter"
+        >
+        </el-table-column>
+        <el-table-column
+                prop="address"
+                label="地址"
+                width="300">
+        </el-table-column>
+        <el-table-column
+                label="操作"
+                width="100">
+            <template slot-scope="scope">
+                <el-button type="text" @click="editUser(scope.row)" size="small">编辑</el-button>
+                <el-button type="text" size="small">授权</el-button>
+            </template>
+        </el-table-column>
+    </el-table>
+    <!--分页-->
+   <!-- <div class="block">
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="currentPage"
+                :page-sizes="[1, 5, 20, 50]"
+                :page-size="100"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="400">
+        </el-pagination>
+    </div>-->
+
+    <!--新增dialog,@click="dialogAddUserForm = true"打开，@click="dialogAddUserForm = false" 关闭 -->
+    <!-- dialog 表单 -->
+    <el-dialog :title="getUserEditTitle" :visible.sync="dialogAddUserForm" @close="closeAddUserForm">
+        <el-form :model="user" :rules="rules" ref="userForm" label-position="left" label-width="80px">
+            <el-input v-model="user.id" autocomplete="off" type="hidden"></el-input>
+            <el-form-item prop="username" label="账号" >
+                <el-input v-model="user.username" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item prop="password" label="密码" v-if="!isUserEdit">
+                <el-input v-model="user.password" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item prop="nickName" label="昵称"  >
+                <el-input v-model="user.nickName" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item  prop="phone" label="手机号" >
+                <el-input v-model="user.phone" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item prop="sex" label="性别" >
+                <el-select v-model="user.sex" placeholder="请选择性别">
+                    <el-option label="男" value="1"></el-option>
+                    <el-option label="女" value="2"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item prop="address" label="住址信息" >
+                <el-input v-model="user.address" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="closeUserDialog">取 消</el-button>
+            <el-button type="primary" @click="submitUserForm('userForm')">确 定</el-button>
+        </div>
+    </el-dialog>
+
+</div>
+<script>
+    new Vue({
+        el:'#main',
+        data() {
+            return {
+                tableData: [],
+                query:{
+                    username:'',
+                    nickName:''
+                },
+                multipleSelection: [], //复选框选择的列
+                dialogAddUserForm: false, //新增窗口默认关闭
+                user:{
+                    id:'',
+                    username:'',
+                    password:'',
+                    nickName:'',
+                    phone:'',
+                    sex:'',
+                    address:''
+                },
+                rules: {
+                    username: {
+                        required: true,
+                        message: '请输入用户名',
+                        trigger: 'blur'
+                    },
+                    password: {
+                        required: true,
+                        message: '请输入密码',
+                        trigger: 'blur'
+                    },
+                    nickName: {
+                        required: true,
+                        message: '请输入昵称',
+                        trigger: 'blur'
+                    },
+                    phone: {
+                        required: true,
+                        message: '请输入手机号',
+                        trigger: 'blur'
+                    },
+                    address: {
+                        required: true,
+                        message: '请输入地址信息',
+                        trigger: 'blur'
+                    },
+                    sex: {
+                        required: true,
+                        message: '请选择性别',
+                        trigger: 'blur'
+                    },
+                },
+                isUserEdit:true, //是否编辑
+                loading: true, //是否显示loading
+                page:{
+                    currentPage:1,
+                    total:1
+                }
+            }
+        },
+        //加载完成
+        mounted() {
+            this.getUserList();
+        },
+        computed:{
+           getUserEditTitle(){
+               return this.isUserEdit ? '新增用户' : '修改用户';
+           }
+        },
+        methods:{
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            //查询用户列表
+            getUserList(){
+                var that = this;
+                that.loading = true;
+                axios.post('/user/list',this.query).then(
+                    (res) => {
+                        that.loading = false;
+                        if(res.data.code == '200'){
+                            this.tableData = res.data.data;
+                        }else{
+                            this.$message.error(res.data.msg);
+                        }
+                    })
+                    .catch((err) => {
+                        that.loading = false;
+                        console.log(err)
+                        this.$message.error('系统错误');
+                    })
+            },
+            // 表格格式化,sex这一列
+            table_sex_formatter(row, column, cellValue, index) {
+                return cellValue == '1' ? '男' : '女';
+            },
+            //删除
+            deleteUser(){
+                // 方法一，通过selection-change 事件获取
+                var deleteUsers = this.multipleSelection; //选中的行
+                if(deleteUsers.length < 1){
+                   return this.$message.warning('请选择删除的行!');
+                }
+                var userIds = "";
+                for(var i=0;i<deleteUsers.length;i++){
+                    if(i === deleteUsers.length-1 ){
+                        userIds += deleteUsers[i].id;
+                    }else{
+                        userIds += deleteUsers[i].id + ",";
+                    }
+                }
+                //是否确认删除
+                this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    axios.post('/user/delete',{userIds:userIds})
+                        .then(
+                           (res) => {
+                               console.log("aaaa",res)
+                                if(res.data.code == '200'){
+                                    this.$message.success(res.data.msg);
+                                    this.getUserList();
+                                }else{
+                                    this.$message.error(res.data.msg);
+                                }
+                        })
+                        .catch((err) => {
+                            console.log(err)
+                            this.$message.error('系统错误');
+                        })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            //打开新增/编辑窗口
+            openUserDialog(){
+                this.dialogAddUserForm = true
+            },
+            //关闭新增/编辑窗口
+            closeUserDialog(){
+                this.closeAddUserForm();
+            },
+            //提交用户添加/编辑表单
+            submitUserForm:function (formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        axios.post('/user/addOrUpdateUser', this.user)
+                            .then((res) => {
+                                //console.log(res)
+                                if(res.data.code == '200'){
+                                    this.getUserList();
+                                    this.$message.success(res.data.msg);
+                                    this.closeUserDialog();
+                                }else{
+                                    this.$message.error(res.data.msg);
+                                }
+                            })
+                            .catch((err) => {
+                                console.log(err)
+                                this.$message.error('系统错误');
+                            })
+                    } else {
+                        console.log('error add user submit!!');
+                        return false;
+                    }
+                });
+            },
+            //新增用户
+            addUser(){
+                this.isUserEdit = false;
+                //清空数据
+                this.user = {
+                    id:'',
+                    username:'',
+                    password:'',
+                    nickName:'',
+                    phone:'',
+                    sex:'',
+                    address:''
+                };
+                this.openUserDialog();
+            },
+            //编辑用户
+            editUser(row){
+               // console.log(row)
+                this.isUserEdit = true;
+                this.user = row;
+                this.openUserDialog();
+            },
+            //点击右上角的X关闭弹窗
+            closeAddUserForm(){
+                this.isUserEdit = false;
+                this.dialogAddUserForm = false //关闭
+            }
+        }
+    })
+</script>
+</body>
+</html>

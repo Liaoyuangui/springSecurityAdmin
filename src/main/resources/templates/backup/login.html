@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录页面</title>
+    <script type="text/javascript" src="../static/js/jquery.js"></script>
+    <script type="text/javascript" src="../static/js/main.js"></script>
+</head>
+<body>
+  <div>
+      <!--action与后台loginProcessingUrl配置的接口名称一样,method必须是post请求-->
+      <!--<form  action="/doLogin" method="post">
+          用户名：<input name="username" type="text" >
+          密码：<input name="password" type="password" >
+          <input value="登录" type="submit">
+      </form>-->
+
+      <!--上面是基于表单提交，但实际工作一般基于ajax来提交，后台需要返回json数据-->
+      <div>
+          <h1>登录页面</h1>
+          用户：<input name="username" type="text" id="username"> <br>
+          密码：<input name="password" type="password" id="password"> <br>
+          <button onclick="login()">登录</button>
+      </div>
+  </div>
+</body>
+<script type="text/javascript">
+    function login() {
+          var user = $("#username").val();
+          var pass = $("#password").val();
+          $.ajax({
+              //url:'/doLogin',
+              url:'/login',
+              dataType:'json',
+              type:'post', /*必须是post请求*/
+              data:{
+                  userName:user,
+                  passWord:pass
+              },
+              success:function (res) {
+                  console.log(res)
+                  if(res.code == '200'){
+                      //利用localstorage存储到本地
+                      var token = res.token;
+                      localStorage.setItem("token",token)
+                      //location.href="/index?token="+token
+                      toUrl('/index');
+                  }else{
+                      alert(res.msg)
+                  }
+              },
+              error:function (res) {
+                  alert("系统错误")
+              }
+          })
+    }
+</script>
+</html>

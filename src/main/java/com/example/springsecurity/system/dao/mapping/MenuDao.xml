@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springsecurity.system.dao.MenuDao">
+
+    <resultMap type="com.example.springsecurity.system.entity.Menu" id="MenuMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="menuName" column="menu_name" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" jdbcType="INTEGER"/>
+        <result property="orderNum" column="order_num" jdbcType="INTEGER"/>
+        <result property="path" column="path" jdbcType="VARCHAR"/>
+        <result property="perms" column="perms" jdbcType="VARCHAR"/>
+        <result property="menuType" column="menu_type" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="icon" column="icon" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into spring_security.menu(menu_name, parent_id, order_num, path, perms, menu_type, create_time,
+        update_time, remark, icon)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.menuName}, #{entity.parentId}, #{entity.orderNum}, #{entity.path}, #{entity.perms},
+            #{entity.menuType}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark}, #{entity.icon})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into spring_security.menu(menu_name, parent_id, order_num, path, perms, menu_type, create_time,
+        update_time, remark, icon)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.menuName}, #{entity.parentId}, #{entity.orderNum}, #{entity.path}, #{entity.perms},
+            #{entity.menuType}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark}, #{entity.icon})
+        </foreach>
+        on duplicate key update
+        menu_name = values(menu_name) , parent_id = values(parent_id) , order_num = values(order_num) , path =
+        values(path) , perms = values(perms) , menu_type = values(menu_type) , create_time = values(create_time) ,
+        update_time = values(update_time) , remark = values(remark) , icon = values(icon)
+    </insert>
+
+
+    <!--根据用户查询菜单权限标识-->
+    <select id="selectMenuPermsByUserId" resultType="java.lang.String">
+        SELECT m.perms FROM role r,user_role ur,menu m,role_menu rm
+        WHERE r.id=ur.role_id AND m.id=rm.menu_id AND r.id=rm.role_id
+        AND ur.user_id = #{userId}
+    </select>
+
+    <!--根据登录用户查询菜单列表-->
+    <select id="selectMenuList" resultMap="MenuMap">
+        SELECT m.* FROM role r,user_role ur,menu m,role_menu rm
+        WHERE r.id=ur.role_id AND m.id=rm.menu_id AND r.id=rm.role_id
+        AND ur.user_id = #{userId}
+        order by order_num
+    </select>
+
+</mapper>
+
