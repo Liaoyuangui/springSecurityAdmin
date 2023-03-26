@@ -27,7 +27,7 @@
     </el-form>
     <!--按钮-->
     <el-row>
-        <el-button type="primary" plain icon="el-icon-plus" @click="openUserDialog">新增</el-button>
+        <el-button type="primary" plain icon="el-icon-plus" @click="addUser">新增</el-button>
         <el-button type="danger" plain  icon="el-icon-delete" @click="deleteUser">删除</el-button>
     </el-row>
     <!--表单-->
@@ -83,21 +83,25 @@
         </el-table-column>
     </el-table>
     <!--分页-->
-   <!-- <div class="block">
+    <div class="block">
         <el-pagination
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
-                :current-page="currentPage"
-                :page-sizes="[1, 5, 20, 50]"
-                :page-size="100"
+                :current-page=page.currentPage
+                :page-sizes="[1,5,10,20,50]"
+                :page-size=page.pageSize
                 layout="total, sizes, prev, pager, next, jumper"
-                :total="400">
+                :total=page.total>
         </el-pagination>
-    </div>-->
+    </div>
 
     <!--新增dialog,@click="dialogAddUserForm = true"打开，@click="dialogAddUserForm = false" 关闭 -->
     <!-- dialog 表单 -->
-    <el-dialog :title="getUserEditTitle" :visible.sync="dialogAddUserForm" @close="closeAddUserForm">
+    <el-dialog :title="getUserEditTitle"
+               :visible.sync="dialogAddUserForm"
+               @close="closeAddUserForm"
+               :before-close="beforeCloseAddUserDialog"
+    >
         <el-form :model="user" :rules="rules" ref="userForm" label-position="left" label-width="80px">
             <el-input v-model="user.id" autocomplete="off" type="hidden"></el-input>
             <el-form-item prop="username" label="账号" >
@@ -186,7 +190,8 @@
                 loading: true, //是否显示loading
                 page:{
                     currentPage:1,
-                    total:1
+                    total:1,
+                    pageSize: 1
                 }
             }
         },
@@ -200,17 +205,36 @@
            }
         },
         methods:{
+            //复选框选中
             handleSelectionChange(val) {
                 this.multipleSelection = val;
+            },
+            //页数大小改变
+            handleSizeChange(val) {
+                this.page.pageSize = val;
+                this.page.currentPage = 1;
+                this.getUserList(); //查询一次数据
+            },
+            //当前页码改变
+            handleCurrentChange(val) {
+                this.page.currentPage = val;
+                this.getUserList(); //查询一次数据
             },
             //查询用户列表
             getUserList(){
                 var that = this;
                 that.loading = true;
-                axios.post('/user/list',this.query).then(
+                //获取参数
+                var param = {};
+                param.username = this.query.username;
+                param.nickName = this.query.nickName;
+                param.pageSize= this.page.pageSize;
+                param.pageNum = this.page.currentPage;
+                axios.post('/user/list',param).then(
                     (res) => {
                         that.loading = false;
                         if(res.data.code == '200'){
+                            this.page.total = res.data.total;
                             this.tableData = res.data.data;
                         }else{
                             this.$message.error(res.data.msg);
@@ -281,7 +305,7 @@
             submitUserForm:function (formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        axios.post('/user/addOrUpdateUser', this.user)
+                        axios.post('/user/addOrUpdateUser',this.user)
                             .then((res) => {
                                 //console.log(res)
                                 if(res.data.code == '200'){
@@ -305,7 +329,6 @@
             //新增用户
             addUser(){
                 this.isUserEdit = false;
-                //清空数据
                 this.user = {
                     id:'',
                     username:'',
@@ -322,12 +345,17 @@
                // console.log(row)
                 this.isUserEdit = true;
                 this.user = row;
+                //console.log("update",this.user)
                 this.openUserDialog();
             },
             //点击右上角的X关闭弹窗
             closeAddUserForm(){
                 this.isUserEdit = false;
                 this.dialogAddUserForm = false //关闭
+            },
+            //关闭窗口前的回调
+            beforeCloseAddUserDialog(){
+
             }
         }
     })

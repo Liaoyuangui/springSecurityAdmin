@@ -2,12 +2,10 @@ package com.example.springsecurity.system.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.api.ApiController;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springsecurity.common.controller.BaseController;
 import com.example.springsecurity.common.utils.JsonUtils;
-import com.example.springsecurity.common.utils.Res.AjaxResult;
+import com.example.springsecurity.common.utils.Res.Ret;
 import com.example.springsecurity.common.utils.StringUtils;
 import com.example.springsecurity.system.entity.User;
 import com.example.springsecurity.system.service.UserService;
@@ -16,8 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
-import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * (User)表控制层
@@ -42,7 +40,7 @@ public class UserController extends BaseController {
      * @return 所有数据
      */
     @GetMapping
-    public AjaxResult selectAll(Page<User> page, User user) {
+    public Ret selectAll(Page<User> page, User user) {
         return success(this.userService.page(page, new QueryWrapper<>(user)));
     }
 
@@ -75,13 +73,16 @@ public class UserController extends BaseController {
      * @Author liaoyuangui
      * @Date 2023/3/17 14:23
      * @param
-     * @return com.example.springsecurity.common.utils.Res.AjaxResult
+     * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/list")
-    @PreAuthorize("hasAnyAuthority('system:user:list')")
-    public AjaxResult list(@RequestBody User user){
-        List<User> users = userService.getList(user);
-        return success(users);
+    @PreAuthorize("@ss.hasPermi('system:user:list')")
+    public Ret list(@RequestBody Map<String,Object> param){
+        Page page = getPageParam(param);
+        if(null == page){
+            return pageError();
+        }
+        return userService.getList(page,param);
     }
 
     /**
@@ -89,11 +90,11 @@ public class UserController extends BaseController {
      * @Author liaoyuangui
      * @Date 2023/3/17 15:46
      * @param userIds
-     * @return com.example.springsecurity.common.utils.Res.AjaxResult
+     * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/delete")
     // @PreAuthorize("hasAnyAuthority('system:user:delete')")
-    public AjaxResult delete(@RequestBody String userIds){
+    public Ret delete(@RequestBody String userIds){
         if(StringUtils.isEmpty(userIds)){
             return error("请选择删除的数据！");
         }
@@ -113,11 +114,11 @@ public class UserController extends BaseController {
      * @Author liaoyuangui
      * @Date 2023/3/17 17:32
      * @param user
-     * @return com.example.springsecurity.common.utils.Res.AjaxResult
+     * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/addOrUpdateUser")
     // @PreAuthorize("hasAnyAuthority('system:user:add')")
-    public AjaxResult addOrUpdateUser(@RequestBody User user){
+    public Ret addOrUpdateUser(@RequestBody User user){
         return userService.addOrUpdateUser(user);
     }
 

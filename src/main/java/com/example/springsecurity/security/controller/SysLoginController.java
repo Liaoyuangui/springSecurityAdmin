@@ -1,7 +1,7 @@
 package com.example.springsecurity.security.controller;
 
 import com.example.springsecurity.common.constant.Constants;
-import com.example.springsecurity.common.utils.Res.AjaxResult;
+import com.example.springsecurity.common.utils.Res.Ret;
 import com.example.springsecurity.security.service.SysLoginService;
 import com.example.springsecurity.system.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +25,8 @@ public class SysLoginController {
      * @return 结果
      */
     @PostMapping("/login")
-    public AjaxResult login(@RequestBody User user){
-        AjaxResult ajax = AjaxResult.success();
+    public Ret login(@RequestBody User user){
+        Ret ajax = Ret.success();
         // 生成令牌
         String token = loginService.login(user.getUsername(), user.getPassword());
         ajax.put(Constants.TOKEN, token);

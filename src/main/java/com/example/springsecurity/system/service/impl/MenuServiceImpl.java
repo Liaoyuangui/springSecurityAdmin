@@ -23,17 +23,17 @@ public class MenuServiceImpl extends ServiceImpl<MenuDao, Menu> implements MenuS
     MenuDao menuDao;
 
     @Override
-    public Set<String> selectMenuPermsByUserId(Integer userId) {
+    public Set<String> selectMenuPermsByUserId(String userId) {
         return menuDao.selectMenuPermsByUserId(userId);
     }
 
     @Override
-    public List<Menu> selectMenuList(Menu menu, Integer userId) {
+    public List<Menu> selectMenuList(Menu menu, String userId) {
         return menuDao.selectMenuList(userId);
     }
 
     @Override
-    public List<Map<String, Object>> selectMenuList(Integer userId) {
+    public List<Map<String, Object>> selectMenuList(String userId) {
         List<Menu> menus = menuDao.selectMenuList(userId);
         //找出type为C 的
         //List<Menu> list = menus.stream().filter(a -> "C".equals(a.getMenuType())).collect(Collectors.toList());
@@ -49,10 +49,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuDao, Menu> implements MenuS
                     map.put("icon",m.getIcon());
                     map.put("href",m.getPath());
                     map.put("id",m.getId().toString());
-                    Integer id = m.getId();
+                    String id = m.getId();
                     List<Map<String,String>> childList = new ArrayList<>();
                     //找下面的子菜单
-                    List<Menu> itemList = menus.stream().filter(a -> a.getParentId() == id).collect(Collectors.toList());
+                    List<Menu> itemList = menus.stream().filter(a -> a.getParentId().equals(id)).collect(Collectors.toList());
                     for(Menu itemMenu : itemList){
                         Map<String,String> itemMap = new HashMap<>();
                         itemMap.put("title",itemMenu.getMenuName());

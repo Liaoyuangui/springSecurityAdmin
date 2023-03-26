@@ -1,9 +1,8 @@
 package com.example.springsecurity.security.handle;
 
-import com.example.springsecurity.common.utils.Res.AjaxResult;
+import com.example.springsecurity.common.utils.Res.Ret;
 import com.example.springsecurity.common.utils.Res.HttpStatus;
 import com.example.springsecurity.common.utils.Res.ResponseUtil;
-import com.example.springsecurity.common.utils.StringUtils;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -26,6 +25,6 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint, S
         int code = HttpStatus.UNAUTHORIZED;
         String msg = "请求访问：{"+request.getRequestURI()+"}，认证失败，无法访问系统资源";
         //response.sendRedirect("/toLogin");
-        ResponseUtil.out(request,response,AjaxResult.error(code, msg));
+        ResponseUtil.out(request,response,Ret.error(code, msg));
     }
 }

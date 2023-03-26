@@ -1,10 +1,11 @@
 package com.example.springsecurity.system.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.example.springsecurity.common.utils.Res.AjaxResult;
+import com.example.springsecurity.common.utils.Res.Ret;
 import com.example.springsecurity.system.entity.User;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * (User)表服务接口
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public interface UserService extends IService<User> {
 
-    List<User> getList(User user);
+    Ret getList(Page page, Map<String, Object> param);
 
 
     /**
@@ -26,15 +27,15 @@ public interface UserService extends IService<User> {
      **/
     boolean delete(String ids);
 
-    AjaxResult addUser(User user);
+    Ret addUser(User user);
 
     /**
      * @Description  新增或修改用户
      * @Author liaoyuangui
      * @Date 2023/3/20 16:11
      * @param user
-     * @return com.example.springsecurity.common.utils.Res.AjaxResult
+     * @return com.example.springsecurity.common.utils.Res.Ret
      **/
-    AjaxResult addOrUpdateUser(User user);
+    Ret addOrUpdateUser(User user);
 }
 

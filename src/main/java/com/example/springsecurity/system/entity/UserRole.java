@@ -14,34 +14,34 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class UserRole extends Model<UserRole> {
     //id
-    private Integer id;
+    private String id;
     //用户id
-    private Integer userId;
+    private String userId;
     //角色id
-    private Integer roleId;
+    private String roleId;
 
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public Integer getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
-    public Integer getRoleId() {
+    public String getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(Integer roleId) {
+    public void setRoleId(String roleId) {
         this.roleId = roleId;
     }
 

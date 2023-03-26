@@ -14,18 +14,18 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class Role extends Model<Role> {
     //主键
-    private Integer id;
+    private String id;
     //角色名称
     private String roleName;
     //权限标识
     private String roleKey;
 
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 

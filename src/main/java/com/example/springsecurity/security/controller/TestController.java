@@ -1,6 +1,6 @@
 package com.example.springsecurity.security.controller;
 
-import com.example.springsecurity.common.utils.Res.AjaxResult;
+import com.example.springsecurity.common.utils.Res.Ret;
 import com.example.springsecurity.security.entity.LoginUser;
 import com.example.springsecurity.system.entity.User;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -113,7 +113,7 @@ public class TestController {
             System.out.println("user : " + user);
 
             //用户的id
-            Integer userId = user.getId();
+            String userId = user.getId();
             System.out.println("userId: " + userId);
 
             //User其余信息可以用这种方式获取
@@ -123,11 +123,11 @@ public class TestController {
 
             System.out.println("已登录账号：" + username);
 
-            return AjaxResult.success("已登录",user);
+            return Ret.success("已登录",user);
         } else {
             //未登录
             System.out.println("未登录...." );
-            return AjaxResult.success("未成功","");
+            return Ret.success("未成功","");
         }
 
 

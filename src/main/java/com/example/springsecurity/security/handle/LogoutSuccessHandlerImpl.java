@@ -1,6 +1,6 @@
 package com.example.springsecurity.security.handle;
 
-import com.example.springsecurity.common.utils.Res.AjaxResult;
+import com.example.springsecurity.common.utils.Res.Ret;
 import com.example.springsecurity.common.utils.Res.HttpStatus;
 import com.example.springsecurity.common.utils.Res.ResponseUtil;
 import com.example.springsecurity.common.utils.StringUtils;
@@ -40,6 +40,6 @@ public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler{
             tokenService.delLoginUser(loginUser.getUserId().toString());
         }
         int code = HttpStatus.SUCCESS;
-        ResponseUtil.out(request,response, AjaxResult.error(code, "退出成功") );
+        ResponseUtil.out(request,response, Ret.error(code, "退出成功") );
     }
 }

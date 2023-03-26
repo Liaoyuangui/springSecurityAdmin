@@ -20,6 +20,6 @@ public interface RoleService extends IService<Role> {
      * @param
      * @return java.util.Set<java.lang.String>
      **/
-    Set<String> selectRolePermissionByUserId(Integer userId);
+    Set<String> selectRolePermissionByUserId(String userId);
 }
 

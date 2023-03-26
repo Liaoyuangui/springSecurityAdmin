@@ -15,11 +15,11 @@ import java.util.Date;
 @SuppressWarnings("serial")
 public class Menu extends Model<Menu> {
     //主键
-    private Integer id;
+    private String id;
     //菜单名称
     private String menuName;
     //父id
-    private Integer parentId;
+    private String parentId;
     //排序
     private Integer orderNum;
     //路径
@@ -38,11 +38,11 @@ public class Menu extends Model<Menu> {
     private String icon;
 
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -54,11 +54,11 @@ public class Menu extends Model<Menu> {
         this.menuName = menuName;
     }
 
-    public Integer getParentId() {
+    public String getParentId() {
         return parentId;
     }
 
-    public void setParentId(Integer parentId) {
+    public void setParentId(String parentId) {
         this.parentId = parentId;
     }
 

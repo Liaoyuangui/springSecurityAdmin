@@ -22,7 +22,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleDao, Role> implements RoleS
     RoleDao roleDao;
 
     @Override
-    public Set<String> selectRolePermissionByUserId(Integer userId) {
+    public Set<String> selectRolePermissionByUserId(String userId) {
         return roleDao.selectRolePermissionByUserId(userId);
     }
 }

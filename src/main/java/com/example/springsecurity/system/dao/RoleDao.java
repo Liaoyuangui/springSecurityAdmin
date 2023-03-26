@@ -41,6 +41,6 @@ public interface RoleDao extends BaseMapper<Role> {
      * @param userId
      * @return java.util.Set<java.lang.String>
      **/
-    Set<String> selectRolePermissionByUserId(Integer userId);
+    Set<String> selectRolePermissionByUserId(String userId);
 }
 

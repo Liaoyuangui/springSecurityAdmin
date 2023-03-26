@@ -10,8 +10,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.Set;
 
 /**
- * RuoYi首创 自定义权限实现，ss取自SpringSecurity首字母
- * 
+ * RuoYi 自定义权限实现，ss取自SpringSecurity首字母
  * @author ruoyi
  */
 @Service("ss")
@@ -33,8 +32,7 @@ public class PermissionService
      * @param permission 权限字符串
      * @return 用户是否具备某权限
      */
-    public boolean hasPermi(String permission)
-    {
+    public boolean hasPermi(String permission){
         if (StringUtils.isEmpty(permission))
         {
             return false;
@@ -161,8 +159,7 @@ public class PermissionService
      * @param permission 权限字符串
      * @return 用户是否具备某权限
      */
-    private boolean hasPermissions(Set<String> permissions, String permission)
-    {
+    private boolean hasPermissions(Set<String> permissions, String permission){
         return permissions.contains(ALL_PERMISSION) || permissions.contains(StringUtils.trim(permission));
     }
 }

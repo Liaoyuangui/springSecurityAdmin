@@ -2,14 +2,11 @@ package com.example.springsecurity.system.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.api.ApiController;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springsecurity.common.controller.BaseController;
-import com.example.springsecurity.common.utils.Res.AjaxResult;
+import com.example.springsecurity.common.utils.Res.Ret;
 import com.example.springsecurity.system.entity.Menu;
 import com.example.springsecurity.system.service.MenuService;
-import org.aspectj.weaver.loadtime.Aj;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,7 +38,7 @@ public class MenuController extends BaseController {
      * @return 所有数据
      */
     @GetMapping
-    public AjaxResult selectAll(Page<Menu> page, Menu menu) {
+    public Ret selectAll(Page<Menu> page, Menu menu) {
         return success(this.menuService.page(page, new QueryWrapper<>(menu)));
     }
 
@@ -52,7 +49,7 @@ public class MenuController extends BaseController {
      * @return 单条数据
      */
     @GetMapping("{id}")
-    public AjaxResult selectOne(@PathVariable Serializable id) {
+    public Ret selectOne(@PathVariable Serializable id) {
         return success(this.menuService.getById(id));
     }
 
@@ -63,7 +60,7 @@ public class MenuController extends BaseController {
      * @return 新增结果
      */
     @PostMapping
-    public AjaxResult insert(@RequestBody Menu menu) {
+    public Ret insert(@RequestBody Menu menu) {
         return success(this.menuService.save(menu));
     }
 
@@ -74,7 +71,7 @@ public class MenuController extends BaseController {
      * @return 修改结果
      */
     @PutMapping
-    public AjaxResult update(@RequestBody Menu menu) {
+    public Ret update(@RequestBody Menu menu) {
         return success(this.menuService.updateById(menu));
     }
 
@@ -85,7 +82,7 @@ public class MenuController extends BaseController {
      * @return 删除结果
      */
     @DeleteMapping
-    public AjaxResult delete(@RequestParam("idList") List<Long> idList) {
+    public Ret delete(@RequestParam("idList") List<Long> idList) {
         return success(this.menuService.removeByIds(idList));
     }
 
@@ -99,7 +96,7 @@ public class MenuController extends BaseController {
     //@PreAuthorize("@ss.hasPermi('system:menu:list')")
     //@PreAuthorize("hasAnyRole('vip1')")
     @GetMapping("/list")
-    public AjaxResult list(){
+    public Ret list(){
         List<Map<String, Object>> menus = menuService.selectMenuList(getUserId());
         return success(menus);
     }

@@ -14,7 +14,7 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class User extends Model<User> {
     //主键
-    private Integer id;
+    private String id;
     //用户名
     private String username;
     //密码
@@ -29,11 +29,11 @@ public class User extends Model<User> {
     private String nickName;
 
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 

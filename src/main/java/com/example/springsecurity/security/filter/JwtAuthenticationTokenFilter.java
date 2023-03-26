@@ -1,18 +1,12 @@
 package com.example.springsecurity.security.filter;
 
-import com.example.springsecurity.common.utils.Res.AjaxResult;
 import com.example.springsecurity.common.utils.Res.HttpStatus;
-import com.example.springsecurity.common.utils.Res.ResponseUtil;
 import com.example.springsecurity.common.utils.StringUtils;
 import com.example.springsecurity.security.entity.LoginUser;
 import com.example.springsecurity.security.service.TokenService;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -75,7 +69,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter{
                 String msg = "请求访问认证失败，原因：登录已过期，请重新登录!";
                 response.sendRedirect("/toLogin");
                 //前后分离放开
-                //ResponseUtil.out(request,response, AjaxResult.error(code, msg));
+                //ResponseUtil.out(request,response, Ret.error(code, msg));
             }
         }
 

@@ -41,7 +41,7 @@ public interface MenuDao extends BaseMapper<Menu> {
      * @param userId
      * @return java.util.Set<java.lang.String>
      **/
-    Set<String> selectMenuPermsByUserId(Integer userId);
+    Set<String> selectMenuPermsByUserId(String userId);
 
     /**
      * @Description  根据用户id 查询菜单列表
@@ -51,6 +51,6 @@ public interface MenuDao extends BaseMapper<Menu> {
      * @param userId
      * @return java.util.List<com.example.springsecurity.system.entity.Menu>
      **/
-    List<Menu> selectMenuList(Integer userId);
+    List<Menu> selectMenuList(String userId);
 }
 

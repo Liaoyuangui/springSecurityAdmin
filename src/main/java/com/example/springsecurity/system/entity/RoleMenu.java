@@ -14,34 +14,34 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class RoleMenu extends Model<RoleMenu> {
     //主键
-    private Integer id;
+    private String id;
     //权限id
-    private Integer roleId;
+    private String roleId;
     //菜单id
-    private Integer menuId;
+    private String menuId;
 
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public Integer getRoleId() {
+    public String getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(Integer roleId) {
+    public void setRoleId(String roleId) {
         this.roleId = roleId;
     }
 
-    public Integer getMenuId() {
+    public String getMenuId() {
         return menuId;
     }
 
-    public void setMenuId(Integer menuId) {
+    public void setMenuId(String menuId) {
         this.menuId = menuId;
     }
 

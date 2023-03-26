@@ -21,7 +21,7 @@ public interface MenuService extends IService<Menu> {
      * @param userId
      * @return java.util.Set<java.lang.String>
      **/
-    Set<String> selectMenuPermsByUserId(Integer userId);
+    Set<String> selectMenuPermsByUserId(String userId);
 
     /**
      * @Description 根据用户权限查询菜单列表
@@ -31,7 +31,7 @@ public interface MenuService extends IService<Menu> {
      * @param userId
      * @return java.util.List<com.example.springsecurity.system.entity.Menu>
      **/
-    List<Menu> selectMenuList(Menu menu, Integer userId);
+    List<Menu> selectMenuList(Menu menu, String userId);
 
     /**
      * @Description 根据用户权限查询菜单列表
@@ -40,6 +40,6 @@ public interface MenuService extends IService<Menu> {
      * @param userId 用户id
      * @return java.util.List<com.example.springsecurity.system.entity.Menu>
      **/
-    List<Map<String,Object>> selectMenuList(Integer userId);
+    List<Map<String,Object>> selectMenuList(String userId);
 }
 

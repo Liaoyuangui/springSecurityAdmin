@@ -14,7 +14,7 @@ public class SecurityUtils{
     /**
      * 用户ID
      **/
-    public static Integer getUserId(){
+    public static String getUserId(){
         try{
             return getLoginUser().getUserId();
         }
@@ -84,7 +84,7 @@ public class SecurityUtils{
      * @param userId 用户ID
      * @return 结果
      */
-    public static boolean isAdmin(Integer userId){
-        return userId != null && 1 == userId;
+    public static boolean isAdmin(String userId){
+        return userId != null && "0".equals(userId);
     }
 }
