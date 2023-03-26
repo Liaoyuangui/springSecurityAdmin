@@ -1,6 +1,8 @@
 package com.example.springsecurity.system.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.springsecurity.common.utils.Res.Ret;
 import com.example.springsecurity.system.entity.Menu;
 
 import java.util.List;
@@ -41,5 +43,13 @@ public interface MenuService extends IService<Menu> {
      * @return java.util.List<com.example.springsecurity.system.entity.Menu>
      **/
     List<Map<String,Object>> selectMenuList(String userId);
+
+    /***
+     * 查询菜单列表
+     * @param page 分页
+     * @param param 参数
+     * @return
+     */
+    Ret getList(Page page, Map<String,Object> param);
 }
 

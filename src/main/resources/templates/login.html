@@ -56,12 +56,12 @@
                 submitForm(formName) {
                     this.$refs[formName].validate((valid) => {
                         if (valid) {
-                            axios.post('/login', this.ruleForm)
+                            axios.post(path+'login', this.ruleForm)
                                 .then((res) => {
                                     if(res.data.code == '200'){
                                         var token = res.data.token;
                                         sessionStorage.setItem('token',token);
-                                        toUrl("/system/index");
+                                        toUrl(path+"system/index");
                                     }else{
                                         this.$message.error(res.data.msg);
                                     }

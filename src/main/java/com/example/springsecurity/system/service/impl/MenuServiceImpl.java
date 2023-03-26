@@ -1,8 +1,13 @@
 package com.example.springsecurity.system.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.springsecurity.common.utils.Res.Ret;
+import com.example.springsecurity.common.utils.StringUtils;
 import com.example.springsecurity.system.dao.MenuDao;
 import com.example.springsecurity.system.entity.Menu;
+import com.example.springsecurity.system.entity.User;
 import com.example.springsecurity.system.service.MenuService;
 import org.springframework.stereotype.Service;
 
@@ -68,6 +73,29 @@ public class MenuServiceImpl extends ServiceImpl<MenuDao, Menu> implements MenuS
             }
         }
         return menuList;
+    }
+
+    @Override
+    public Ret getList(Page page, Map<String, Object> param) {
+        QueryWrapper<Menu> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like("menu_name",param.get("menuName"));
+        queryWrapper.like("menu_type",param.get("menuType"));
+        queryWrapper.orderByAsc("order_num");
+        Page<Menu> dataPage = menuDao.selectPage(page, queryWrapper);
+        List<Menu> records = dataPage.getRecords();
+        List<Menu> dataList = records;
+        //添加父级目录，数据多建议直接用sql处理
+        records.forEach(a->{
+            String parentId = a.getParentId();
+            if(StringUtils.isNotEmpty(parentId)){
+                Optional<Menu> first = dataList.stream().filter(e -> parentId.equals(e.getId())).findFirst();
+                if(first.isPresent()){
+                    a.setParentName(first.get().getMenuName());
+                }
+            }
+        });
+        dataPage.setRecords(records);
+        return Ret.getPageOkResult(dataPage);
     }
 }
 

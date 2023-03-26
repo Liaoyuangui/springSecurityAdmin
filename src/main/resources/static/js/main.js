@@ -1,3 +1,32 @@
+var path = Path();
+
+
+/**
+ * 区分本地地址和服务器地址
+ * 获取绝对路径
+ * @author:lyg
+ */
+function Path(){
+    var curWwwPath=window.document.location.href;//获取当前网址，如：http://localhost/ems/pages/basic.jsp
+    var pathName=window.document.location.pathname;	//获取主机地址之后的目录，如:/ems/pages/basic.jsp
+    var pos=curWwwPath.indexOf(pathName);
+    var localhostPath=curWwwPath.substring(0,pos);//获取主机地址，如：http://localhost:8080
+    var projectName=pathName.substring(0,pathName.substr(1).indexOf("/")+1);//获取带"/"的项目名，如：/ems, yx
+    var basePath=localhostPath+projectName+"/";//获取项目的basePath   http://localhost:8080/ems/
+    //添加本地访问地址,如要添加本机ip,在local_path数组中添加，否则树形菜单访问不到
+    var local_path = new Array();
+    local_path[0]="localhost";
+    local_path[1]="127.0.0.1";
+    for(var i=0; i<local_path.length; i++){
+        var path = local_path[i];
+        if(basePath.indexOf(path) != -1 ){
+            return "/"  ;  //返回本地项目的根
+        }
+    }
+    return "/服务器的根/";
+};
+
+
 //axios 请求添加默认请求头
 // Request interceptors for API calls
 axios.interceptors.request.use(
@@ -85,3 +114,5 @@ function toUrl(url) {
     }
     location.href = url+"?token="+user_token;
 }
+
+

@@ -199,7 +199,7 @@
                 $('.tab-item-ul').css("left", 0)
             },
             openTabs: function (e) { //打开页面 加载显示tabs
-                console.log(e)
+               // console.log(e)
                 this.welcome = false
                 var tabs = this.tabs
                 if (this.tabs.length == 0) {
@@ -295,12 +295,12 @@
                             type: 'warning'
                         }).then(() => {
                             //window.location.href="/toLogin"
-                            axios.get('/logout').then((res) => {
+                            axios.get(path+'logout').then((res) => {
                                 //console.log(res)
                                 if(res.data.code == '200'){
                                     //console.log(res.data.data)
 									this.$message.success(res.data.msg);
-                                    window.location.href="/toLogin";
+                                    window.location.href= path+"toLogin";
                                 }else{
                                     this.$message.error(res.data.msg);
                                 }
@@ -316,7 +316,7 @@
                 }
             },
             getMenuList(){
-                axios.get('/system/menu/list').then((res) => {
+                axios.get(path+'system/menu/list').then((res) => {
                         if(res.data.code == '200'){
                             this.navs = res.data.data;
                             //console.log(res.data.data)

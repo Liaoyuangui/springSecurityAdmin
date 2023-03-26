@@ -9,6 +9,7 @@ import com.example.springsecurity.system.entity.Menu;
 import com.example.springsecurity.system.service.MenuService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
@@ -30,16 +31,29 @@ public class MenuController extends BaseController {
     @Resource
     private MenuService menuService;
 
-    /**
-     * 分页查询所有数据
-     *
-     * @param page 分页对象
-     * @param menu 查询实体
-     * @return 所有数据
+    /***
+     * 视图
+     * @return
      */
-    @GetMapping
-    public Ret selectAll(Page<Menu> page, Menu menu) {
-        return success(this.menuService.page(page, new QueryWrapper<>(menu)));
+    @PreAuthorize("@ss.hasPermi('system:menu:list')")
+    @GetMapping("/indexView")
+    public ModelAndView indexView(){
+        return new ModelAndView("pages/menu/menu_list");
+    }
+
+    /***
+     * 查询菜单列表
+     * @param param
+     * @return
+     */
+    @PostMapping("/list")
+    @PreAuthorize("@ss.hasPermi('system:menu:list')")
+    public Ret list(@RequestBody Map<String,Object> param){
+        Page page = getPageParam(param);
+        if(null == page){
+            return pageError();
+        }
+        return menuService.getList(page,param);
     }
 
     /**
@@ -82,7 +96,7 @@ public class MenuController extends BaseController {
      * @return 删除结果
      */
     @DeleteMapping
-    public Ret delete(@RequestParam("idList") List<Long> idList) {
+    public Ret delete(@RequestParam("idList") List<String> idList) {
         return success(this.menuService.removeByIds(idList));
     }
 

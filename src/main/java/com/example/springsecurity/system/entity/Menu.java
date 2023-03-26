@@ -1,6 +1,7 @@
 package com.example.springsecurity.system.entity;
 
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 
 import java.io.Serializable;
@@ -36,6 +37,10 @@ public class Menu extends Model<Menu> {
     private String remark;
     //图标
     private String icon;
+
+    //父级菜单名称
+    @TableField(exist = false)
+    private String parentName;
 
 
     public String getId() {
@@ -124,6 +129,14 @@ public class Menu extends Model<Menu> {
 
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+
+    public String getParentName() {
+        return parentName;
+    }
+
+    public void setParentName(String parentName) {
+        this.parentName = parentName;
     }
 
     /**

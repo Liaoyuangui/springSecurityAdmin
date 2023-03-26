@@ -35,6 +35,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
         queryWrapper.like("username",param.get("username"));
         queryWrapper.like("nick_name",param.get("nickName"));
         queryWrapper.ne("id",0);
+        queryWrapper.orderByAsc("id");
         Page dataPage = userDao.selectPage(page, queryWrapper);
         return Ret.getPageOkResult(dataPage);
     }
