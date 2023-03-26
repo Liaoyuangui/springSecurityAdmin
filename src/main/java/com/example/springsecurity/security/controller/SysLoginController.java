@@ -26,10 +26,10 @@ public class SysLoginController {
      */
     @PostMapping("/login")
     public Ret login(@RequestBody User user){
-        Ret ajax = Ret.success();
+        Ret ret = Ret.success();
         // 生成令牌
         String token = loginService.login(user.getUsername(), user.getPassword());
-        ajax.put(Constants.TOKEN, token);
-        return ajax;
+        ret.set(Constants.TOKEN, token);
+        return ret;
     }
 }

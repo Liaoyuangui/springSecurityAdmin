@@ -102,28 +102,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     // （认证）配置用户及其对应的角色
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        //数据在内存中定义，一般要去数据库取，jdbc中去拿，
-        /**
-         * 懒羊羊,灰太狼,喜羊羊,小灰灰分别具有vip0,vip1,vip2,vip3的权限
-         * root则同时又vip0到vip3的所有权限
-         */
-        //Spring security 5.0中新增了多种加密方式，也改变了密码的格式。
-        //要想我们的项目还能够正常登陆，需要修改一下configure中的代码。我们要将前端传过来的密码进行某种方式加密
-        //spring security 官方推荐的是使用bcrypt加密方式。
-       /* auth.inMemoryAuthentication()
-                .withUser("懒羊羊").password("123").roles("vip0")
-                .and()
-                .withUser("灰太狼").password("123").roles("vip1")
-                .and()
-                .withUser("喜羊羊").password("123").roles("vip2")
-                .and()
-                .withUser("小灰灰").password("123").roles("vip3")
-                .and()
-                .withUser("root").password("123").roles("vip1","vip2","vip3")
-                .and()
-                .withUser("admin").password("123456").roles("index","vip1","vip2","vip3");*/
-
-       //从数据库获取，对应的角色参考数据库中的user_role 表
         //配置service，该service需要实现UserDetailsService接口, 然后登录的时候会自动去查询该接口中的方法
         //数据库中的权限数据需以ROLE_ 开头， 如vip1 -> ROLE_vip1
         auth.userDetailsService(userService).passwordEncoder(new BCryptPasswordEncoder());

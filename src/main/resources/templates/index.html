@@ -6,14 +6,8 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 		<title>后台管理</title>
-		<link rel="stylesheet" href="../static/lib/element2.13.0/lib-master/theme-chalk/index.css" />
 		<link rel="stylesheet" href="../static/lib/web/web.css" />
-		<script src="../static/lib/vue/vue.js" type="text/javascript" charset="utf-8"></script>
-		<script src="../static/lib/jquery-3.4.1/jquery-3.4.1.js" type="text/javascript" charset="utf-8"></script>
-		<script src="../static/lib/element2.13.0/lib-master/index.js" type="text/javascript" charset="utf-8"></script>
-		<script src="../static/lib/layer/layer.js"></script>
-		<script src="../static/lib/axios/dist/axios.js"></script>
-		<script src="../static/js/main.js"></script>
+		<script th:replace="include"></script>
 	</head>
 	<body>
 		<div id="app" style="display: none;">
@@ -300,7 +294,21 @@
                             cancelButtonText: '取消',
                             type: 'warning'
                         }).then(() => {
-                            window.location.href="./pages/login/login.html"
+                            //window.location.href="/toLogin"
+                            axios.get('/logout').then((res) => {
+                                //console.log(res)
+                                if(res.data.code == '200'){
+                                    //console.log(res.data.data)
+									this.$message.success(res.data.msg);
+                                    window.location.href="/toLogin";
+                                }else{
+                                    this.$message.error(res.data.msg);
+                                }
+                            })
+                                .catch((err) => {
+                                    console.log(err)
+                                    this.$message.error('系统错误');
+                                })
                         }).catch(() => {
                             this.$message({  type: 'info', message: '已取消退出' });
                         });
@@ -311,7 +319,7 @@
                 axios.get('/system/menu/list').then((res) => {
                         if(res.data.code == '200'){
                             this.navs = res.data.data;
-                            console.log(res.data.data)
+                            //console.log(res.data.data)
                         }else{
                             this.$message.error(res.data.msg);
                         }

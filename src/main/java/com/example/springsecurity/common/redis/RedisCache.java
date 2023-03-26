@@ -1,4 +1,4 @@
-package com.example.springsecurity.redis;
+package com.example.springsecurity.common.redis;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundSetOperations;

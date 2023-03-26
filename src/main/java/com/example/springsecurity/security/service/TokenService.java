@@ -4,7 +4,7 @@ import com.example.springsecurity.common.constant.Constants;
 import com.example.springsecurity.common.utils.StringUtils;
 import com.example.springsecurity.common.utils.uuid.IdUtils;
 import com.example.springsecurity.security.entity.LoginUser;
-import com.example.springsecurity.redis.RedisCache;
+import com.example.springsecurity.common.redis.RedisCache;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

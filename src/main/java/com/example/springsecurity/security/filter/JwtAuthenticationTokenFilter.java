@@ -1,6 +1,8 @@
 package com.example.springsecurity.security.filter;
 
 import com.example.springsecurity.common.utils.Res.HttpStatus;
+import com.example.springsecurity.common.utils.Res.ResponseUtil;
+import com.example.springsecurity.common.utils.Res.Ret;
 import com.example.springsecurity.common.utils.StringUtils;
 import com.example.springsecurity.security.entity.LoginUser;
 import com.example.springsecurity.security.service.TokenService;
@@ -64,12 +66,17 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter{
             if(requestURI.equals("/login")){
                 chain.doFilter(request, response);
             }else{
-                //token无效，则告知前端。不再继续调用Filter链。
-                int code = HttpStatus.FORBIDDEN;
-                String msg = "请求访问认证失败，原因：登录已过期，请重新登录!";
-                response.sendRedirect("/toLogin");
-                //前后分离放开
-                //ResponseUtil.out(request,response, Ret.error(code, msg));
+                //判断是否是系统登录后的首页，如果是没有登录不能直接访问
+                if("/system/index".equals(requestURI)){
+                    response.sendRedirect("/toLogin");
+                    return;
+                }else{
+                    //接口访问
+                    //token无效，则告知前端。不再继续调用Filter链。
+                    int code = HttpStatus.FORBIDDEN;
+                    String msg = "请求访问认证失败，原因：可能登录已过期，请重新登录再试!";
+                    ResponseUtil.out(request,response, Ret.error(code, msg));
+                }
             }
         }
 

@@ -12,16 +12,17 @@ axios.interceptors.request.use(
 
 //响应验证token是否过期
 // Response interceptor for API calls
-axios.interceptors.response.use(
+/*axios.interceptors.response.use(
     response => {
         console.log(1)
         return response;
     },
     error => {
         console.log(2)
+        console.log("@@@@",error)
         if(error.response.code == 403){
             //登录过期
-            this.$message.error(res.data.msg);
+            this.$message.error(error.data.msg);
             sessionStorage.removeItem('token');
             location.href = "/toLogin"
         };
@@ -31,7 +32,7 @@ axios.interceptors.response.use(
             sessionStorage.removeItem('token');
         }
     }
-);
+);*/
 
 
 
