@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springsecurity.common.controller.BaseController;
 import com.example.springsecurity.common.utils.Res.Ret;
 import com.example.springsecurity.system.entity.Menu;
+import com.example.springsecurity.system.entity.User;
 import com.example.springsecurity.system.service.MenuService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import javax.annotation.Resource;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * (Menu)表控制层
@@ -53,7 +55,7 @@ public class MenuController extends BaseController {
         if(null == page){
             return pageError();
         }
-        return menuService.getList(page,param);
+        return menuService.getMenuList(page,param);
     }
 
     /**
@@ -103,15 +105,22 @@ public class MenuController extends BaseController {
 
 
     /**
-     * 获取菜单列表
+     * 获取当前登录人的菜单列表
      */
-    //@PreAuthorize("hasAuthority('system:menu:list')")
-    @PreAuthorize("hasAnyAuthority('system:menu:list')")
-    //@PreAuthorize("@ss.hasPermi('system:menu:list')")
-    //@PreAuthorize("hasAnyRole('vip1')")
     @GetMapping("/list")
     public Ret list(){
-        List<Map<String, Object>> menus = menuService.selectMenuList(getUserId());
+        //List<Map<String, Object>> menus = menuService.selectMenuList(getUserId());
+        List<Menu> menus = menuService.selectMenuByUserId(getUserId());
+        return success(menus);
+    }
+
+    /**
+     * 查询所有的菜单不包含按钮
+     * @return
+     */
+    @GetMapping("/queryAllMenuNotButton")
+    public Ret queryAllMenuNotButton(){
+        List<Menu> menus = menuService.queryAllMenuNotButton();
         return success(menus);
     }
 

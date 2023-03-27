@@ -34,14 +34,14 @@
 								<!-- 没有子选项 -->
 								<el-menu-item @click="openTabs(item)" v-if="!item.children" :index="item.id">
 									<i :class="item.icon"></i>
-									<span slot="title">{{item.title}}</span>
+									<span slot="title">{{item.menuName}}</span>
 								</el-menu-item>
 								<!-- 有子选项 -->
 								<el-submenu v-if="item.children" :index="item.id">
-									<template slot="title"><i :class="item.icon"></i>{{item.title}}</template>
+									<template slot="title"><i :class="item.icon"></i>{{item.menuName}}</template>
 									<el-menu-item v-for="(item,index) in item.children" @click="openTabs(item)" :key="item.id" :index="item.id">
 										<i :class="item.icon"></i>
-										{{item.title}}
+										{{item.menuName}}
 									</el-menu-item>
 								</el-submenu>
 							</div>
@@ -84,9 +84,9 @@
 								<i class="el-icon-s-platform  tab-item-icon"></i>
 								<div class="tab-item-text">控制台</div>
 							</div>
-							<div class="tab-item" @click="tabActive(item)" :id="item.id" :class="id==item.id?'tab-item-active':'1'" v-for="(item,index) in tabs">
+							<div class="tab-item" v-for="(item,index) in tabs" :id="item.id" @click="tabActive(item)"  :class="id==item.id?'tab-item-active':'1'" >
 								<i class="tab-item-icon" :class="item.data.icon"></i>
-								<div class="tab-item-text">{{item.data.title}}</div>
+								<div class="tab-item-text">{{item.data.menuName}}</div>
 								<i @click.stop="tabClose(item)" class="el-icon-close tab-item-close"></i>
 							</div>
 						</div>
@@ -178,7 +178,7 @@
 		},
         methods: {
             getMenuSrc(menu){
-                var src = menu.data.href + "?token="+this.token;
+                var src = menu.data.path + "?token="+this.token;
                 return  src;
             },
             isShowNav: function (e) { //隐藏显示左边导航栏

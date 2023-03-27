@@ -45,11 +45,23 @@ public interface MenuService extends IService<Menu> {
     List<Map<String,Object>> selectMenuList(String userId);
 
     /***
+     * 根据用户权限查询菜单列表
+     * @param userId
+     * @return
+     */
+    List<Menu> selectMenuByUserId(String userId);
+
+    /***
      * 查询菜单列表
      * @param page 分页
      * @param param 参数
      * @return
      */
-    Ret getList(Page page, Map<String,Object> param);
+    Ret getMenuList(Page page, Map<String,Object> param);
+    /**
+     * 查询所有的菜单不包含按钮
+     * @return
+     */
+    List<Menu> queryAllMenuNotButton();
 }
 

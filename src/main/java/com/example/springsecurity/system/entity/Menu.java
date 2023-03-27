@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.activerecord.Model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * (Menu)表实体类
@@ -42,6 +43,9 @@ public class Menu extends Model<Menu> {
     @TableField(exist = false)
     private String parentName;
 
+    //子菜单
+    @TableField(exist = false)
+    private List<Menu> children;
 
     public String getId() {
         return id;
@@ -135,8 +139,16 @@ public class Menu extends Model<Menu> {
         return parentName;
     }
 
+    public List<Menu> getChildren() {
+        return children;
+    }
+
     public void setParentName(String parentName) {
         this.parentName = parentName;
+    }
+
+    public void setChildren(List<Menu> children) {
+        this.children = children;
     }
 
     /**
