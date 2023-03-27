@@ -37,6 +37,9 @@
                     style="width: 100%;margin-top: 5px"
                     @selection-change="handleSelectionChange"
                     v-loading="loading"
+                    row-key="id"
+                    default-expand-all
+                    :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
             >
                 <el-table-column
                         prop="id"
