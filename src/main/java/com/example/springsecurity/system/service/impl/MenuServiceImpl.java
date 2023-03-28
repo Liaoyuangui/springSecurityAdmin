@@ -85,6 +85,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuDao, Menu> implements MenuS
         queryWrapper.like("menu_name",param.get("menuName"));
         queryWrapper.like("menu_type",param.get("menuType"));
         queryWrapper.orderByAsc("order_num");
+        //查询所有的菜单数据
         Page<Menu> dataPage = menuDao.selectPage(page, queryWrapper);
         List<Menu> records = dataPage.getRecords();
         List<Menu> dataList = records;
@@ -134,6 +135,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuDao, Menu> implements MenuS
      */
     private Menu selectChildren(Menu menu,List<Menu> menuList){
         menu.setChildren(new ArrayList<>());
+        //根据id 和 parentId 获取到这个主菜单下的所有子菜单
         List<Menu> collect = menuList.stream().filter(a -> menu.getId().equals(a.getParentId())).collect(Collectors.toList());
         if(collect.size() > 0){
             for(Menu m : collect){

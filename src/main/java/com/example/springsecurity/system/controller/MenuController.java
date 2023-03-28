@@ -75,7 +75,7 @@ public class MenuController extends BaseController {
      * @param menu 实体对象
      * @return 新增结果
      */
-    @PostMapping
+    @PostMapping("/add")
     public Ret insert(@RequestBody Menu menu) {
         return success(this.menuService.save(menu));
     }

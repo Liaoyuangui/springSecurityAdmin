@@ -117,7 +117,7 @@
                         @size-change="handleSizeChange"
                         @current-change="handleCurrentChange"
                         :current-page=page.currentPage
-                        :page-sizes="[1,5,10,20,50]"
+                        :page-sizes="[5,10,20,50,100]"
                         :page-size=page.pageSize
                         layout="total, sizes, prev, pager, next, jumper"
                         :total=page.total>
@@ -128,7 +128,7 @@
             <!-- dialog 表单 -->
             <el-dialog :title="getUserEditTitle"
                        :visible.sync="dialogAddUserForm"
-                       @close="closeAddUserForm"
+                       @close="closeAddForm"
                        :before-close="beforeCloseAddUserDialog"
             >
                 <el-form :model="menu" :rules="rules" ref="menuForm" label-position="left" label-width="80px">
@@ -142,42 +142,42 @@
                             </el-radio-group>
                         </template>
                     </el-form-item>
-                    <el-form-item prop="parentId" label="主目录" >
-                        <el-select class="main-select-tree" ref="selectTree" v-model="menu.parentId"  >
-                            <el-option v-for="item in formatData(datas)" :key="item.value" :label="item.label" :value="item.value" style="display: none" > </el-option>
+                    <el-form-item v-show="menu.menuType!='M' " prop="parentName" label="主目录" >
+                        <el-select  ref="selectTree" v-model="menu.parentName" style="width: 100%" placeholder="请选择父级菜单" >
+                            <el-option v-for="item in forFunction(allMenuNotButton)" :key="item.id" :label="item.id" :value="item.menuName" style="display: none" > </el-option>
                             <el-tree class="main-select-el-tree" ref="selecteltree"
-                                     :data="datas"
+                                     :data="allMenuNotButton"
                                      node-key="id"
                                      highlight-current
                                      :props="defaultProps"
                                      @node-click="handleNodeClick"
-                                     :current-node-key="value"
                                      :expand-on-click-node="expandOnClickNode"
                                      default-expand-all />
                         </el-select>
                     </el-form-item>
-                    <el-form-item prop="username" label="菜单名称" >
-                        <el-input v-model="menu.menuName" autocomplete="off"></el-input>
+                    <el-form-item prop="menuName" label="菜单名称" >
+                        <el-input v-model="menu.menuName" autocomplete="off" placeholder="请输入菜单名称"></el-input>
                     </el-form-item>
                     <el-form-item prop="orderNum" label="排序号" >
-                        <el-input v-model="menu.orderNum" autocomplete="off"></el-input>
+                        <el-input type="number" v-model="menu.orderNum" autocomplete="off" placeholder="请输入排序号"></el-input>
                     </el-form-item>
-                    <el-form-item  prop="path" label="请求路径" >
-                        <el-input v-model="menu.path" autocomplete="off"></el-input>
+                    <el-form-item  v-show="menu.menuType=='C'" prop="path" label="请求路径" >
+                        <el-input v-model="menu.path" autocomplete="off" placeholder="请输入菜单访问路径"></el-input>
                     </el-form-item>
-                    <el-form-item  prop="perms" label="权限标识" >
-                        <el-input v-model="menu.perms" autocomplete="off"></el-input>
+                    <el-form-item  v-show="menu.menuType!='M'"  prop="perms" label="权限标识" >
+                        <el-input v-model="menu.perms" autocomplete="off" placeholder="请输入xx:xx:xx格式的权限标识，如：system:menu:list "></el-input>
                     </el-form-item>
-                    <el-form-item prop="icon" label="图标" >
-                        <el-input v-model="menu.icon" autocomplete="off"></el-input>
+                    <el-form-item v-show="menu.menuType!='F'" prop="icon" label="图标" >
+                        <el-input v-model="menu.icon" autocomplete="off" placeholder="elementui 图标标识，如：el-icon-more"></el-input>
+                        <a href="https://element.eleme.cn/#/zh-CN/component/icon" target="_blank">前往选择图标</a>
                     </el-form-item>
                     <el-form-item prop="remark" label="备注" >
-                        <el-input v-model="menu.remark" autocomplete="off"></el-input>
+                        <el-input v-model="menu.remark" autocomplete="off" placeholder="备注信息，需要备注请填写"></el-input>
                     </el-form-item>
                 </el-form>
                 <div slot="footer" class="dialog-footer">
-                    <el-button @click="closeUserDialog">取 消</el-button>
-                    <el-button type="primary" @click="submitUserForm('userForm')">确 定</el-button>
+                    <el-button @click="closeAddDialog">取 消</el-button>
+                    <el-button type="primary" @click="submitForm('menuForm')">确 定</el-button>
                 </div>
             </el-dialog>
 
@@ -196,44 +196,45 @@
                             id:'',
                             menuName:'',
                             parentId:'',
+                            parentName:'',
                             orderNum:'',
                             path:'',
                             perms:'',
-                            menuType:'',
+                            menuType:'C',
                             createTime:'',
                             updateTime:'',
                             remark:'',
                             icon:''
                         },
                         rules: {
-                            username: {
+                            menuName: {
                                 required: true,
-                                message: '请输入用户名',
+                                message: '请输入菜单名称',
                                 trigger: 'blur'
                             },
-                            password: {
+                            parentId: {
                                 required: true,
-                                message: '请输入密码',
+                                message: '请选择父级菜单',
                                 trigger: 'blur'
                             },
-                            nickName: {
+                            parentName: {
                                 required: true,
-                                message: '请输入昵称',
+                                message: '请选择父级菜单',
                                 trigger: 'blur'
                             },
-                            phone: {
+                            orderNum: {
                                 required: true,
-                                message: '请输入手机号',
+                                message: '请输入排序号',
                                 trigger: 'blur'
                             },
-                            address: {
+                            path: {
                                 required: true,
-                                message: '请输入地址信息',
+                                message: '请输入请求路径',
                                 trigger: 'blur'
                             },
-                            sex: {
+                            perms: {
                                 required: true,
-                                message: '请选择性别',
+                                message: '请输入XX:XX:XX格式的权限标识',
                                 trigger: 'blur'
                             },
                         },
@@ -244,34 +245,14 @@
                         page:{
                             currentPage:1,
                             total:1,
-                            pageSize: 10
+                            pageSize: 20
                         },
-
-                        value: 6,
-                        expandOnClickNode: true,
-                        options:[],
-                        datas: [{
-                            id: 1,
-                            label: '云南',
-                            children: [{
-                                id: 2,
-                                label: '昆明',
-                                children: [
-                                    {id: 3,label: '五华区',children:[{id: 8,label: '北辰小区'}]},
-                                    {id: 4,label: '盘龙区'}
-                                ]
-                            }]
-                        }, {
-                            id: 5,
-                            label: '湖南',
-                            children: [
-                                {id: 6,label: '长沙'},
-                                {id: 7,label: '永州'}
-                            ]
-                        }],
+                        expandOnClickNode: true, //是否展开下拉树形列表
+                        allMenuNotButton: [],  //所有的菜单数据不包含按钮
+                        //树形菜单的参数
                         defaultProps: {
                             children: 'children',
-                            label: 'label'
+                            label: 'menuName'
                         }
 
                     }
@@ -279,6 +260,7 @@
                 //加载完成
                 mounted() {
                     this.getMenuList();
+                    this.queryAllMenuNotButton();
                 },
                 computed:{
                     getUserEditTitle(){
@@ -287,32 +269,28 @@
                 },
                 methods:{
                     handleNodeClick(node){
-                        this.value = node.id;
+                        //console.log(node)
+                        this.menu.parentId = node.id;
+                        this.menu.parentName = node.menuName;
                         this.$refs.selectTree.blur();
                     },
                     // 巧妙的利用了select组件的渲染方式，通过隐藏options来动态计算下拉高度，通过模型同步实现了select组件渲染，不必赋值，同步模型。
-                    formatData(data){
+                    forFunction(data){
                         let options = [];
-                        data.forEach((item,key) => {
-                            options.push({label:item.label,value:item.id});
-                            if(item.children){
-                                item.children.forEach((items,keys) => {
-                                    options.push({label:items.label,value:items.id});
-                                    if(items.children){
-                                        items.children.forEach((itemss,keyss) => {
-                                            options.push({label:itemss.label,value:itemss.id});
-                                            if(itemss.children){
-                                                itemss.children.forEach((itemsss,keysss) => {
-                                                    options.push({label:itemsss.label,value:itemsss.id});
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        });
+                        //定义一个递归函数
+                        const getStr = function(data){
+                            data.forEach((item)=>{
+                                options.push({label:item.label,value:item.id});
+                                if(item.children){
+                                    getStr(item.children)
+                                }
+                            })
+                        }
+                        getStr(data); //调用一次
+                        //console.log(options);
                         return options;
                     },
+
                     //复选框选中
                     handleSelectionChange(val) {
                         this.multipleSelection = val;
@@ -342,8 +320,28 @@
                             (res) => {
                                 that.loading = false;
                                 if(res.data.code == '200'){
-                                    this.page.total = res.data.total;
-                                    this.tableData = res.data.data;
+                                    that.page.total = res.data.total;
+                                    that.tableData = res.data.data;
+                                }else{
+                                    this.$message.error(res.data.msg);
+                                }
+                            })
+                            .catch((err) => {
+                                that.loading = false;
+                                console.log(err)
+                                this.$message.error('系统错误');
+                            })
+                    },
+                    //查询所有菜单不含按钮
+                    queryAllMenuNotButton(){
+                        var that = this;
+                        that.loading = true;
+                        //获取参数
+                        axios.get(path+'system/menu/queryAllMenuNotButton').then(
+                            (res) => {
+                                that.loading = false;
+                                if(res.data.code == '200'){
+                                    that.allMenuNotButton = res.data.data;
                                 }else{
                                     this.$message.error(res.data.msg);
                                 }
@@ -365,10 +363,6 @@
                         }else{
                             return cellValue;
                         }
-                    },
-                    //格式图标
-                    table_icon_formatter:function(row, column, cellValue, index){
-                        return '<i class="'+cellValue+'"></i>'
                     },
                     //删除
                     deleteUser(){
@@ -418,20 +412,20 @@
                         this.dialogAddUserForm = true
                     },
                     //关闭新增/编辑窗口
-                    closeUserDialog(){
-                        this.closeAddUserForm();
+                    closeAddDialog(){
+                        this.closeAddForm();
                     },
-                    //提交用户添加/编辑表单
-                    submitUserForm:function (formName) {
+                    //提交添加/编辑表单
+                    submitForm:function (formName) {
                         this.$refs[formName].validate((valid) => {
                             if (valid) {
-                                axios.post('/user/addOrUpdateUser',this.user)
+                                axios.post(path+'system/menu/add',this.menu)
                                     .then((res) => {
                                         //console.log(res)
                                         if(res.data.code == '200'){
                                             this.getMenuList();
                                             this.$message.success(res.data.msg);
-                                            this.closeUserDialog();
+                                            this.closeAddDialog();
                                         }else{
                                             this.$message.error(res.data.msg);
                                         }
@@ -441,7 +435,7 @@
                                         this.$message.error('系统错误');
                                     })
                             } else {
-                                console.log('error add user submit!!');
+                                console.log('error add menu submit!!');
                                 return false;
                             }
                         });
@@ -469,7 +463,7 @@
                         this.openUserDialog();
                     },
                     //点击右上角的X关闭弹窗
-                    closeAddUserForm(){
+                    closeAddForm(){
                         this.isUserEdit = false;
                         this.dialogAddUserForm = false //关闭
                     },
