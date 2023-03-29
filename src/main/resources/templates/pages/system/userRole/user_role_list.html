@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>用户角色授权列表</title>
+    <script th:replace="include"></script>
+</head>
+<body>
+<div id="main">
+    <!--条件-->
+    <el-form :inline="true" :model="query" class="demo-form-inline">
+        <el-form-item label="账号">
+            <el-input v-model="query.username" placeholder="用户名"></el-input>
+        </el-form-item>
+        <el-form-item label="昵称">
+            <el-input v-model="query.nickName" placeholder="昵称"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="getUserList">查询</el-button>
+        </el-form-item>
+    </el-form>
+    <!--用户表单-->
+    <el-table
+            ref="multipleTable"
+            :data="tableData"
+            border
+            style="width: 100%;margin-top: 5px"
+            v-loading="loading"
+    >
+        <el-table-column
+                fixed
+                prop="username"
+                label="账号"
+                width="150">
+        </el-table-column>
+        <el-table-column
+                prop="nickName"
+                label="昵称"
+                width="120">
+        </el-table-column>
+        <el-table-column
+                prop="phone"
+                label="手机号码"
+                width="120">
+        </el-table-column>
+        <el-table-column
+                label="操作"
+                width="60">
+            <template slot-scope="scope">
+                <el-button type="text" @click="openDialog"  sec:authorize="hasAuthority('system:user:list')" >授权</el-button>
+            </template>
+        </el-table-column>
+    </el-table>
+    <!--分页-->
+    <div class="block">
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page=page.currentPage
+                :page-sizes="[1,5,10,20,50]"
+                :page-size=page.pageSize
+                layout="total, sizes, prev, pager, next, jumper"
+                :total=page.total>
+        </el-pagination>
+    </div>
+
+    <!--新增dialog,@click="dialogAddUserForm = true"打开，@click="dialogAddUserForm = false" 关闭 -->
+    <!-- dialog 表单 -->
+    <el-dialog title="用户角色授权"
+               :visible.sync="dialogForm"
+               @close="closeDialog"
+               center
+               fullscreen
+    >
+        <el-container>
+            <!--左边-->
+            <el-aside width="200px" >
+                <el-form :inline="true" :model="user" class="demo-form-inline">
+                    <el-form-item label="当前用户">
+                        <el-input v-model="user.id" type="hidden"></el-input>
+                        <el-input v-model="user.username" disabled></el-input>
+                    </el-form-item>
+                </el-form>
+            </el-aside>
+            <!--中间-->
+            <el-main>
+                <!--角色表单-->
+                <el-table
+                        ref="multipleRoleTable"
+                        :data="roleData"
+                        border
+                        style="width: 100%;margin-top: 5px"
+                        @selection-change="handleSelectionChange"
+                        v-loading="loading"
+                >
+
+                    <el-table-column
+                            prop="id"
+                            type="selection"
+                            width="55"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                            fixed
+                            prop="roleName"
+                            label="角色名称"
+                    >
+                    </el-table-column>
+                    <!--<el-table-column
+                            prop="roleKey"
+                            label="权限标识"
+                            width="300">
+                    </el-table-column>-->
+                </el-table>
+            </el-main>
+        </el-container>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="closeDialog">取 消</el-button>
+            <el-button type="primary" @click="submitUserForm('userForm')">确 定</el-button>
+        </div>
+    </el-dialog>
+
+</div>
+<script>
+    new Vue({
+        el:'#main',
+        data() {
+            return {
+                tableData: [],
+                roleData: [],
+                query:{
+                    username:'',
+                    nickName:''
+                },
+                //授权用户
+                user:{
+                  id:'',
+                  username:''
+                },
+                multipleSelection: [], //复选框选择的列
+                dialogForm: false, //新增窗口默认关闭
+                loading: true, //是否显示loading
+                page:{
+                    currentPage:1,
+                    total:1,
+                    pageSize: 10
+                }
+            }
+        },
+        //加载完成
+        mounted() {
+            this.getUserList();
+            //this.getRoleList();
+        },
+        computed:{
+        },
+        methods:{
+            //复选框选中
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            //页数大小改变
+            handleSizeChange(val) {
+                this.page.pageSize = val;
+                this.page.currentPage = 1;
+                this.getUserList(); //查询一次数据
+            },
+            //当前页码改变
+            handleCurrentChange(val) {
+                this.page.currentPage = val;
+                this.getUserList(); //查询一次数据
+            },
+            //查询用户列表
+            getUserList(){
+                var that = this;
+                that.loading = true;
+                //获取参数
+                var param = {};
+                param.username = this.query.username;
+                param.nickName = this.query.nickName;
+                param.pageSize= this.page.pageSize;
+                param.pageNum = this.page.currentPage;
+                axios.post(path+'user/list',param).then(
+                    (res) => {
+                        that.loading = false;
+                        if(res.data.code == '200'){
+                            this.page.total = res.data.total;
+                            this.tableData = res.data.data;
+                        }else{
+                            this.$message.error(res.data.msg);
+                        }
+                    })
+                    .catch((err) => {
+                        that.loading = false;
+                        console.log(err)
+                        this.$message.error('系统错误');
+                    })
+            },
+            //查询角色列表
+            getRoleList(){
+                var that = this;
+                that.loading = true;
+                //获取参数
+                var param = {};
+                param.pageSize= 1000;
+                param.pageNum = 1;
+                axios.post(path+'system/role/list',param).then(
+                    (res) => {
+                        that.loading = false;
+                        if(res.data.code == '200'){
+                            this.roleData = res.data.data;
+                        }else{
+                            this.$message.error(res.data.msg);
+                        }
+                    })
+                    .catch((err) => {
+                        that.loading = false;
+                        console.log(err)
+                        this.$message.error('系统错误');
+                    })
+            },
+            //授权
+            openDialog(){
+                this.getRoleList();
+                this.dialogForm = true;
+            },
+            //关闭窗口
+            closeDialog(){
+                this.dialogForm = false
+            },
+            //提交用户添加/编辑表单
+            submitUserForm:function (formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var url = "";
+                        if(this.isUserEdit){
+                            url = path+'user/update'; //修改
+                        }else{
+                            url = path+'user/add'; //添加
+                        }
+                        axios.post(url,this.user)
+                            .then((res) => {
+                                //console.log(res)
+                                if(res.data.code == '200'){
+                                    this.getUserList();
+                                    this.$message.success(res.data.msg);
+                                    this.closeUserDialog();
+                                }else{
+                                    this.$message.error(res.data.msg);
+                                }
+                            })
+                            .catch((err) => {
+                                console.log(err)
+                                this.$message.error('系统错误');
+                            })
+                    } else {
+                        console.log('error add user submit!!');
+                        return false;
+                    }
+                });
+            },
+
+        }
+    })
+</script>
+</body>
+</html>

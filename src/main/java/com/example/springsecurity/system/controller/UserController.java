@@ -33,6 +33,19 @@ public class UserController extends BaseController {
     private UserService userService;
 
     /**
+     * @Description
+     * @Author liaoyuangui
+     * @Date 2023/3/17 10:39
+     * @param
+     * @return org.springframework.web.servlet.ModelAndView
+     **/
+    @GetMapping("/indexView")
+    public ModelAndView indexView(){
+        return new ModelAndView("pages/system/user/user_list");
+    }
+
+
+    /**
      * 分页查询所有数据
      *
      * @param page 分页对象
@@ -42,19 +55,6 @@ public class UserController extends BaseController {
     @GetMapping
     public Ret selectAll(Page<User> page, User user) {
         return success(this.userService.page(page, new QueryWrapper<>(user)));
-    }
-
-
-    /**
-     * @Description
-     * @Author liaoyuangui
-     * @Date 2023/3/17 10:39
-     * @param
-     * @return org.springframework.web.servlet.ModelAndView
-     **/
-    @GetMapping("/indexView")
-    public ModelAndView indexView(){
-        return new ModelAndView("pages/user/user_list");
     }
 
     /**
@@ -116,11 +116,24 @@ public class UserController extends BaseController {
      * @param user
      * @return com.example.springsecurity.common.utils.Res.Ret
      **/
-    @PostMapping("/addOrUpdateUser")
+    @PostMapping("/add")
     // @PreAuthorize("hasAnyAuthority('system:user:add')")
-    public Ret addOrUpdateUser(@RequestBody User user){
+    public Ret add(@RequestBody User user){
         return userService.addOrUpdateUser(user);
     }
 
+
+    /**
+     * @Description 修改用户
+     * @Author liaoyuangui
+     * @Date 2023/3/29 15:26
+     * @param user
+     * @return com.example.springsecurity.common.utils.Res.Ret
+     **/
+    @PostMapping("/update")
+    // @PreAuthorize("hasAnyAuthority('system:user:add')")
+    public Ret update(@RequestBody User user){
+        return userService.addOrUpdateUser(user);
+    }
 }
 

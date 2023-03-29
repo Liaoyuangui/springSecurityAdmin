@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.springsecurity.common.utils.Res.Ret;
 import com.example.springsecurity.system.entity.Menu;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Map;
@@ -63,5 +64,14 @@ public interface MenuService extends IService<Menu> {
      * @return
      */
     List<Menu> queryAllMenuNotButton();
+
+    /**
+     * @Description  删除
+     * @Author liaoyuangui
+     * @Date 2023/3/29 14:24
+     * @param idList
+     * @return com.example.springsecurity.common.utils.Res.Ret
+     **/
+    Ret delete(String idList);
 }
 

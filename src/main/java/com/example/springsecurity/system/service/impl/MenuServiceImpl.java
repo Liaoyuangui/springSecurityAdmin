@@ -1,14 +1,17 @@
 package com.example.springsecurity.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.springsecurity.common.utils.Res.Ret;
 import com.example.springsecurity.common.utils.StringUtils;
 import com.example.springsecurity.system.dao.MenuDao;
+import com.example.springsecurity.system.dao.UserDao;
 import com.example.springsecurity.system.entity.Menu;
 import com.example.springsecurity.system.service.MenuService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -111,6 +114,29 @@ public class MenuServiceImpl extends ServiceImpl<MenuDao, Menu> implements MenuS
         queryWrapper.orderByAsc("order_num");
         List<Menu> menus = menuDao.selectList(queryWrapper);
         return buildMenuList(menus);
+    }
+
+    @Override
+    @Transactional
+    public Ret delete(String idList) {
+        if(StringUtils.isEmpty(idList)){
+            return Ret.error("请选择数据进行删除！");
+        }
+        String[] split = idList.split(",");
+        List<String> list = Arrays.asList(split);
+        for(String id : list){
+            QueryWrapper<Menu> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("parent_id",id);
+            List<Menu> menus = menuDao.selectList(queryWrapper);
+            if(menus.size() > 0){
+                return  Ret.error("选择的菜单含有子节点，不能删除，请先删掉子菜单！");
+            }
+        }
+        int i = menuDao.deleteBatchIds(list);
+        if(i > 0){
+            return Ret.success("删除成功!");
+        }
+        return Ret.error("删除失败！");
     }
 
     /***

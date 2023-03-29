@@ -1,8 +1,11 @@
 package com.example.springsecurity.system.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.springsecurity.common.utils.Res.Ret;
 import com.example.springsecurity.system.entity.Role;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -21,5 +24,30 @@ public interface RoleService extends IService<Role> {
      * @return java.util.Set<java.lang.String>
      **/
     Set<String> selectRolePermissionByUserId(String userId);
+
+    /**
+     * @Description  查询角色列表
+     * @Author liaoyuangui
+     * @param page
+     * @param param
+     * @return com.example.springsecurity.common.utils.Res.Ret
+     **/
+    Ret getRoleList(Page page, Map<String, Object> param);
+
+    /**
+     * @Description 删除角色
+     * @Author liaoyuangui
+     * @param ids
+     * @return com.example.springsecurity.common.utils.Res.Ret
+     **/
+    Ret delete(String ids);
+
+    /**
+     * @Description 添加或编辑角色
+     * @Author liaoyuangui
+     * @param role
+     * @return com.example.springsecurity.common.utils.Res.Ret
+     **/
+    Ret addOrUpdateRole(Role role);
 }
 

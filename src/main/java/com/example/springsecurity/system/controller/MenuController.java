@@ -2,9 +2,12 @@ package com.example.springsecurity.system.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springsecurity.common.controller.BaseController;
+import com.example.springsecurity.common.utils.JsonUtils;
 import com.example.springsecurity.common.utils.Res.Ret;
+import com.example.springsecurity.common.utils.StringUtils;
 import com.example.springsecurity.system.entity.Menu;
 import com.example.springsecurity.system.entity.User;
 import com.example.springsecurity.system.service.MenuService;
@@ -14,9 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * (Menu)表控制层
@@ -40,7 +41,7 @@ public class MenuController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:menu:list')")
     @GetMapping("/indexView")
     public ModelAndView indexView(){
-        return new ModelAndView("pages/menu/menu_list");
+        return new ModelAndView("pages/system/menu/menu_list");
     }
 
     /***
@@ -56,6 +57,18 @@ public class MenuController extends BaseController {
             return pageError();
         }
         return menuService.getMenuList(page,param);
+    }
+
+
+
+    /**
+     * 获取当前登录人的菜单列表
+     */
+    @GetMapping("/list")
+    public Ret list(){
+        //List<Map<String, Object>> menus = menuService.selectMenuList(getUserId());
+        List<Menu> menus = menuService.selectMenuByUserId(getUserId());
+        return success(menus);
     }
 
     /**
@@ -77,6 +90,16 @@ public class MenuController extends BaseController {
      */
     @PostMapping("/add")
     public Ret insert(@RequestBody Menu menu) {
+        if(menu.getMenuType().equals("M")){
+            menu.setParentId("0");
+        }else{
+            String perms = menu.getPerms();
+            String[] split = perms.split(":");
+            if(split.length != 3){
+                return error("权限标识格式有误，请输入xx:xx:xx格式！");
+            }
+        }
+        menu.setCreateTime(new Date());
         return success(this.menuService.save(menu));
     }
 
@@ -86,8 +109,18 @@ public class MenuController extends BaseController {
      * @param menu 实体对象
      * @return 修改结果
      */
-    @PutMapping
+    @PostMapping("/update")
     public Ret update(@RequestBody Menu menu) {
+        if(menu.getMenuType().equals("M")){
+            menu.setParentId("0");
+        }else{
+            String perms = menu.getPerms();
+            String[] split = perms.split(":");
+            if(split.length != 3){
+                return error("权限标识格式有误，请输入xx:xx:xx格式！");
+            }
+        }
+        menu.setUpdateTime(new Date());
         return success(this.menuService.updateById(menu));
     }
 
@@ -97,21 +130,13 @@ public class MenuController extends BaseController {
      * @param idList 主键结合
      * @return 删除结果
      */
-    @DeleteMapping
-    public Ret delete(@RequestParam("idList") List<String> idList) {
-        return success(this.menuService.removeByIds(idList));
-    }
-
-
-
-    /**
-     * 获取当前登录人的菜单列表
-     */
-    @GetMapping("/list")
-    public Ret list(){
-        //List<Map<String, Object>> menus = menuService.selectMenuList(getUserId());
-        List<Menu> menus = menuService.selectMenuByUserId(getUserId());
-        return success(menus);
+    @PostMapping("/delete")
+    public Ret delete(@RequestBody String idList) {
+        String ids = JsonUtils.getString(idList, "idList"); //1,2,3 这种格式
+        if(StringUtils.isEmpty(ids)){
+            return error("请选择删除的数据！");
+        }
+        return menuService.delete(ids);
     }
 
     /**

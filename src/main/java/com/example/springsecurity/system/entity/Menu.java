@@ -2,6 +2,7 @@ package com.example.springsecurity.system.entity;
 
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 
 import java.io.Serializable;
@@ -17,6 +18,7 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class Menu extends Model<Menu> {
     //主键
+    @TableId
     private String id;
     //菜单名称
     private String menuName;

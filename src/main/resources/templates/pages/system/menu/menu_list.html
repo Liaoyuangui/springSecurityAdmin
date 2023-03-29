@@ -12,22 +12,23 @@
                 <el-form-item label="菜单名称">
                     <el-input v-model="query.menuName" placeholder="菜单名称"></el-input>
                 </el-form-item>
-                <el-form-item label="菜单类型">
+                <!--<el-form-item label="菜单类型">
                     <el-select v-model="query.menuType" >
                         <el-option label="请选择" value=""></el-option>
                         <el-option label="目录" value="M"></el-option>
                         <el-option label="菜单" value="C"></el-option>
                         <el-option label="按钮" value="F"></el-option>
                     </el-select>
-                </el-form-item>
+                </el-form-item>-->
                 <el-form-item>
                     <el-button type="primary" @click="getMenuList">查询</el-button>
                 </el-form-item>
             </el-form>
             <!--按钮-->
             <el-row>
-                <el-button type="primary" plain icon="el-icon-plus" @click="addUser">新增</el-button>
-                <el-button type="danger" plain  icon="el-icon-delete" @click="deleteUser">删除</el-button>
+                <el-button type="primary" plain icon="el-icon-plus" @click="addMenu">新增</el-button>
+                <el-button type="success" plain icon="el-icon-edit" @click="editFrom">修改</el-button>
+                <el-button type="danger" plain  icon="el-icon-delete" @click="deleteMenu">删除</el-button>
             </el-row>
             <!--表单-->
             <el-table
@@ -95,20 +96,12 @@
                 <el-table-column
                         prop="createTime"
                         label="创建时间"
-                        width="120">
+                        width="250">
                 </el-table-column>
                 <el-table-column
                         prop="updateTime"
                         label="更新时间"
-                        width="120">
-                </el-table-column>
-                <el-table-column
-                        label="操作"
-                        width="100">
-                    <template slot-scope="scope">
-                        <el-button type="text" @click="editUser(scope.row)" size="small">编辑</el-button>
-                        <el-button type="text" size="small"  sec:authorize="hasAuthority('system:user:list')" >授权</el-button>
-                    </template>
+                        width="250">
                 </el-table-column>
             </el-table>
             <!--分页-->
@@ -124,18 +117,17 @@
                 </el-pagination>
             </div>
 
-            <!--新增dialog,@click="dialogAddUserForm = true"打开，@click="dialogAddUserForm = false" 关闭 -->
-            <!-- dialog 表单 -->
-            <el-dialog :title="getUserEditTitle"
-                       :visible.sync="dialogAddUserForm"
+            <!--新增dialog,@click="dialogAddForm = true"打开，@click="dialogAddUserForm = false" 关闭 -->
+            <!--add dialog 表单 start -->
+            <el-dialog title="添加菜单"
+                       :visible.sync="dialogAddForm"
                        @close="closeAddForm"
-                       :before-close="beforeCloseAddUserDialog"
             >
                 <el-form :model="menu" :rules="rules" ref="menuForm" label-position="left" label-width="80px">
                     <el-input v-model="menu.id" autocomplete="off" type="hidden"></el-input>
                     <el-form-item prop="menuType" label="菜单类型"  >
                         <template>
-                            <el-radio-group v-model="menu.menuType">
+                            <el-radio-group v-model="menu.menuType" @change="checkMenu">
                                 <el-radio label="M">目录</el-radio>
                                 <el-radio label="C">菜单</el-radio>
                                 <el-radio label="F">按钮</el-radio>
@@ -180,14 +172,71 @@
                     <el-button type="primary" @click="submitForm('menuForm')">确 定</el-button>
                 </div>
             </el-dialog>
+            <!--add dialog 表单 end -->
 
+            <!--update dialog 表单 start -->
+            <el-dialog title="修改菜单"
+                       :visible.sync="dialogUpdateForm"
+                       @close="dialogUpdateForm = false "
+            >
+                <el-form :model="menu" :rules="rules" ref="menuForm1" label-position="left" label-width="80px">
+                    <el-input v-model="menu.id" autocomplete="off" type="hidden"></el-input>
+                    <el-form-item prop="menuType" label="菜单类型"  >
+                        <template>
+                            <el-radio-group v-model="menu.menuType" @change="checkMenu">
+                                <el-radio label="M">目录</el-radio>
+                                <el-radio label="C">菜单</el-radio>
+                                <el-radio label="F">按钮</el-radio>
+                            </el-radio-group>
+                        </template>
+                    </el-form-item>
+                    <el-form-item v-show="menu.menuType!='M' " prop="parentName" label="主目录" >
+                        <el-select  ref="selectTree" v-model="menu.parentName" style="width: 100%" placeholder="请选择父级菜单" >
+                            <el-option v-for="item in forFunction(allMenuNotButton)" :key="item.id" :label="item.id" :value="item.menuName" style="display: none" > </el-option>
+                            <el-tree class="main-select-el-tree" ref="selecteltree"
+                                     :data="allMenuNotButton"
+                                     node-key="id"
+                                     highlight-current
+                                     :props="defaultProps"
+                                     @node-click="handleNodeClick"
+                                     :expand-on-click-node="expandOnClickNode"
+                                     default-expand-all />
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item prop="menuName" label="菜单名称" >
+                        <el-input v-model="menu.menuName" autocomplete="off" placeholder="请输入菜单名称"></el-input>
+                    </el-form-item>
+                    <el-form-item prop="orderNum" label="排序号" >
+                        <el-input type="number" v-model="menu.orderNum" autocomplete="off" placeholder="请输入排序号"></el-input>
+                    </el-form-item>
+                    <el-form-item  v-show="menu.menuType=='C'" prop="path" label="请求路径" >
+                        <el-input v-model="menu.path" autocomplete="off" placeholder="请输入菜单访问路径"></el-input>
+                    </el-form-item>
+                    <el-form-item  v-show="menu.menuType!='M'"  prop="perms" label="权限标识" >
+                        <el-input v-model="menu.perms" autocomplete="off" placeholder="请输入xx:xx:xx格式的权限标识，如：system:menu:list "></el-input>
+                    </el-form-item>
+                    <el-form-item v-show="menu.menuType!='F'" prop="icon" label="图标" >
+                        <el-input v-model="menu.icon" autocomplete="off" placeholder="elementui 图标标识，如：el-icon-more"></el-input>
+                        <a href="https://element.eleme.cn/#/zh-CN/component/icon" target="_blank">前往选择图标</a>
+                    </el-form-item>
+                    <el-form-item prop="remark" label="备注" >
+                        <el-input v-model="menu.remark" autocomplete="off" placeholder="备注信息，需要备注请填写"></el-input>
+                    </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="dialogUpdateForm=false">取 消</el-button>
+                    <el-button type="primary" @click="edit('menuForm1')">确 定</el-button>
+                </div>
+            </el-dialog>
+            <!--update dialog 表单 end -->
         </div>
         <script>
             new Vue({
                 el:'#main',
                 data() {
                     return {
-                        tableData: [],
+                        tableData: [], //所有的数据
+                        allMenuNotButton: [],  //所有的菜单数据不包含按钮
                         query:{
                             menuName:'',
                             menuType:''
@@ -240,20 +289,22 @@
                         },
                         isUserEdit:true, //是否编辑
                         multipleSelection: [], //复选框选择的列
-                        dialogAddUserForm: false, //新增窗口默认关闭
+                        dialogAddForm: false, //新增窗口默认关闭
+                        dialogUpdateForm: false, //修改窗口默认关闭
                         loading: true, //是否显示loading
+                        //分页默认设置
                         page:{
                             currentPage:1,
                             total:1,
                             pageSize: 20
                         },
                         expandOnClickNode: true, //是否展开下拉树形列表
-                        allMenuNotButton: [],  //所有的菜单数据不包含按钮
                         //树形菜单的参数
                         defaultProps: {
                             children: 'children',
                             label: 'menuName'
-                        }
+                        },
+
 
                     }
                 },
@@ -263,9 +314,7 @@
                     this.queryAllMenuNotButton();
                 },
                 computed:{
-                    getUserEditTitle(){
-                        return this.isUserEdit ? '新增用户' : '修改用户';
-                    }
+
                 },
                 methods:{
                     handleNodeClick(node){
@@ -305,6 +354,86 @@
                     handleCurrentChange(val) {
                         this.page.currentPage = val;
                         this.getMenuList(); //查询一次数据
+                    },
+                    checkMenu(){
+                        if(this.menu.menuType == 'M'){
+                            //目录
+                            this.rules = {
+                                menuName: {
+                                    required: true,
+                                    message: '请输入菜单名称',
+                                    trigger: 'blur'
+                                },
+                                orderNum: {
+                                    required: true,
+                                    message: '请输入排序号',
+                                    trigger: 'blur'
+                                },
+                            }
+                        }else if(this.menu.menuType == 'C'){
+                            //菜单
+                            this.rules = {
+                                menuName: {
+                                    required: true,
+                                        message: '请输入菜单名称',
+                                        trigger: 'blur'
+                                },
+                                parentId: {
+                                    required: true,
+                                        message: '请选择父级菜单',
+                                        trigger: 'blur'
+                                },
+                                parentName: {
+                                    required: true,
+                                        message: '请选择父级菜单',
+                                        trigger: 'blur'
+                                },
+                                orderNum: {
+                                    required: true,
+                                        message: '请输入排序号',
+                                        trigger: 'blur'
+                                },
+                                path: {
+                                    required: true,
+                                        message: '请输入请求路径',
+                                        trigger: 'blur'
+                                },
+                                perms: {
+                                    required: true,
+                                        message: '请输入XX:XX:XX格式的权限标识',
+                                        trigger: 'blur'
+                                },
+                            }
+                        }else{
+                            //按钮
+                            this.rules = {
+                                menuName: {
+                                    required: true,
+                                    message: '请输入菜单名称',
+                                    trigger: 'blur'
+                                },
+                                parentId: {
+                                    required: true,
+                                    message: '请选择父级菜单',
+                                    trigger: 'blur'
+                                },
+                                parentName: {
+                                    required: true,
+                                    message: '请选择父级菜单',
+                                    trigger: 'blur'
+                                },
+                                orderNum: {
+                                    required: true,
+                                    message: '请输入排序号',
+                                    trigger: 'blur'
+                                },
+                                perms: {
+                                    required: true,
+                                    message: '请输入XX:XX:XX格式的权限标识',
+                                    trigger: 'blur'
+                                },
+                            }
+                        }
                     },
                     //查询菜单列表
                     getMenuList(){
@@ -365,30 +494,30 @@
                         }
                     },
                     //删除
-                    deleteUser(){
+                    deleteMenu(){
                         // 方法一，通过selection-change 事件获取
-                        var deleteUsers = this.multipleSelection; //选中的行
-                        if(deleteUsers.length < 1){
+                        var selection = this.multipleSelection; //选中的行
+                        if(selection.length < 1){
                             return this.$message.warning('请选择删除的行!');
                         }
-                        var userIds = "";
-                        for(var i=0;i<deleteUsers.length;i++){
-                            if(i === deleteUsers.length-1 ){
-                                userIds += deleteUsers[i].id;
+                        var ids = "";
+                        for(var i=0;i<selection.length;i++){
+                            if(i === selection.length-1 ){
+                                ids += selection[i].id;
                             }else{
-                                userIds += deleteUsers[i].id + ",";
+                                ids += selection[i].id + ",";
                             }
                         }
                         //是否确认删除
-                        this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                        this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
                             confirmButtonText: '确定',
                             cancelButtonText: '取消',
                             type: 'warning'
                         }).then(() => {
-                            axios.post('/user/delete',{userIds:userIds})
+                            axios.post(path+'system/menu/delete',{idList:ids})
                                 .then(
                                     (res) => {
-                                        console.log("aaaa",res)
+                                        //console.log("aaaa",res)
                                         if(res.data.code == '200'){
                                             this.$message.success(res.data.msg);
                                             this.getMenuList();
@@ -408,14 +537,14 @@
                         });
                     },
                     //打开新增/编辑窗口
-                    openUserDialog(){
-                        this.dialogAddUserForm = true
+                    openAddDialog(){
+                        this.dialogAddForm = true
                     },
                     //关闭新增/编辑窗口
                     closeAddDialog(){
                         this.closeAddForm();
                     },
-                    //提交添加/编辑表单
+                    //提交添加
                     submitForm:function (formName) {
                         this.$refs[formName].validate((valid) => {
                             if (valid) {
@@ -440,37 +569,65 @@
                             }
                         });
                     },
-                    //新增用户
-                    addUser(){
-                        this.isUserEdit = false;
-                        this.user = {
-                            id:'',
-                            username:'',
-                            password:'',
-                            nickName:'',
-                            phone:'',
-                            sex:'',
-                            address:''
-                        };
-                        this.openUserDialog();
+                    //提交编辑表单
+                    edit:function (formName) {
+                        this.$refs[formName].validate((valid) => {
+                            if (valid) {
+                                axios.post(path+'system/menu/update',this.menu)
+                                    .then((res) => {
+                                        //console.log(res)
+                                        if(res.data.code == '200'){
+                                            this.getMenuList();
+                                            this.$message.success(res.data.msg);
+                                            this.dialogUpdateForm = false;
+                                        }else{
+                                            this.$message.error(res.data.msg);
+                                        }
+                                    })
+                                    .catch((err) => {
+                                        console.log(err)
+                                        this.$message.error('系统错误');
+                                    })
+                            } else {
+                                console.log('error update menu submit!!');
+                                return false;
+                            }
+                        });
                     },
-                    //编辑用户
-                    editUser(row){
+                    //新增
+                    addMenu(){
+                       this.menu = {
+                            id:'',
+                            menuName:'',
+                            parentId:'',
+                            parentName:'',
+                            orderNum:'',
+                            path:'',
+                            perms:'',
+                            menuType:'C',
+                            createTime:'',
+                            updateTime:'',
+                            remark:'',
+                            icon:''
+                        },
+                        this.openAddDialog();
+                    },
+                    //编辑
+                    editFrom(){
                         // console.log(row)
-                        this.isUserEdit = true;
-                        this.user = row;
+                        var selection = this.multipleSelection; //选中的行
+                        if(selection.length != 1){
+                            return this.$message.warning('请选择一行数据进行操作!');
+                        }
+                        this.menu = selection[0];
+                        this.checkMenu();
                         //console.log("update",this.user)
-                        this.openUserDialog();
+                        this.dialogUpdateForm = true;
                     },
                     //点击右上角的X关闭弹窗
                     closeAddForm(){
-                        this.isUserEdit = false;
-                        this.dialogAddUserForm = false //关闭
+                        this.dialogAddForm = false //关闭
                     },
-                    //关闭窗口前的回调
-                    beforeCloseAddUserDialog(){
-
-                    }
                 }
             })
         </script>

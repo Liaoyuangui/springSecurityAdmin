@@ -22,6 +22,7 @@
     <!--按钮-->
     <el-row>
         <el-button type="primary" plain icon="el-icon-plus" @click="addUser">新增</el-button>
+        <el-button type="success" plain icon="el-icon-edit" @click="editUser">修改</el-button>
         <el-button type="danger" plain  icon="el-icon-delete" @click="deleteUser">删除</el-button>
     </el-row>
     <!--表单-->
@@ -69,10 +70,10 @@
         </el-table-column>
         <el-table-column
                 label="操作"
-                width="100">
+                width="60">
             <template slot-scope="scope">
-                <el-button type="text" @click="editUser(scope.row)" size="small">编辑</el-button>
-                <el-button type="text" size="small"  sec:authorize="hasAuthority('system:user:list')" >授权</el-button>
+               <!-- <el-button type="text" @click="editUser(scope.row)" size="small">编辑</el-button>-->
+                <el-button type="text"  sec:authorize="hasAuthority('system:user:list')" >授权</el-button>
             </template>
         </el-table-column>
     </el-table>
@@ -260,7 +261,7 @@
                     }
                 }
                 //是否确认删除
-                this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
@@ -299,7 +300,13 @@
             submitUserForm:function (formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        axios.post(path+'user/addOrUpdateUser',this.user)
+                        var url = "";
+                        if(this.isUserEdit){
+                            url = path+'user/update'; //修改
+                        }else{
+                            url = path+'user/add'; //添加
+                        }
+                        axios.post(url,this.user)
                             .then((res) => {
                                 //console.log(res)
                                 if(res.data.code == '200'){
@@ -337,8 +344,12 @@
             //编辑用户
             editUser(row){
                // console.log(row)
+                var select = this.multipleSelection; //选中的行
+                if(select.length != 1){
+                    return this.$message.warning('请选择一行数据进行编辑!');
+                }
                 this.isUserEdit = true;
-                this.user = row;
+                this.user = select[0];
                 //console.log("update",this.user)
                 this.openUserDialog();
             },
