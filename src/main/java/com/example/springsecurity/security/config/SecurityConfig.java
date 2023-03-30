@@ -92,11 +92,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         };
     }
 
-    //配置忽略掉的 URL 地址,一般用于js,css,图片等静态资源
+    //全家过滤（不会走过滤器链），配置忽略掉的 URL 地址,一般用于js,css,图片等静态资源
     @Override
     public void configure(WebSecurity web) throws Exception {
         //web.ignoring() 用来配置忽略掉的 URL 地址，一般用于静态文件
-        web.ignoring().antMatchers("/static/js/**", "/static/css/**","/static/fonts/**","/static/images/**","/static/lib/**","/static/img/**");
+        //踩坑： antMatchers 不好使，要用mvcMatchers，原因未知
+        web.ignoring().mvcMatchers("/static/**");
     }
 
     // （认证）配置用户及其对应的角色
@@ -139,10 +140,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 过滤请求
                 .authorizeRequests()
                 // 对于登录login接口 toLogin登录页面 注册register 验证码captchaImage 允许匿名访问
-                .antMatchers("/login", "/register","/toLogin", "/captchaImage").permitAll()
+                .antMatchers("/","/login", "/register","/toLogin", "/captchaImage").permitAll()
                 // 静态资源，可匿名访问
-                .antMatchers(HttpMethod.GET, "/", "/*.html", "/**/*.html", "/**/*.css", "/**/*.js", "/profile/**","**/*.json").permitAll()
-                .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/*/api-docs", "/druid/**").permitAll()
+                //.antMatchers("/", "/*.html", "/**/*.html", "/**/*.css", "/**/*.js", "/static/**","**/*.json").permitAll()
+               // .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/*/api-docs", "/druid/**").permitAll()
                 // 除上面外的所有请求全部需要鉴权认证
                 .anyRequest().authenticated() //权限通过接口的注解来控制
                 .and()

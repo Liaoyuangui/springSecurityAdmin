@@ -6,6 +6,7 @@ import com.example.springsecurity.security.service.SysLoginService;
 import com.example.springsecurity.system.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 
 /**
@@ -40,6 +41,14 @@ public class SysLoginController {
 
     @Autowired
     private SysLoginService loginService;
+
+    /***
+     * 跳转登录页面
+     */
+    @RequestMapping(path = {"/toLogin","/"})
+    public ModelAndView toLogin(){
+        return new ModelAndView("login");
+    }
 
     /**
      * 登录方法

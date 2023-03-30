@@ -15,11 +15,11 @@
 			<div class="left-side" :style="{backgroundColor:webInfo.bg}">
 				<!-- 顶部盒子 显示系统名称 头像 欢迎 -->
 				<div class="left-top-box">
-					<div class="left-top-title" :style="{color:webInfo.textColorActive}"><span sec:authentication="name"></span></div>
+					<div class="left-top-title" :style="{color:webInfo.textColorActive}">Security权限管理</div>
 					<div class="left-top-avatar">
 						<img src="../static/img/head.jpg" />
 					</div>
-					<div class="left-top-welcome" :style="{color:webInfo.textColorActive}"><span sec:authentication="name"></span>欢迎您！</div>
+					<div class="left-top-welcome" :style="{color:webInfo.textColorActive}">欢迎您：<span sec:authentication="name"></span></div>
 				</div>
 				<!-- 导航栏盒子-->
 				<div class="left-navs-box">
@@ -115,7 +115,7 @@
 				</div>
 
 				<!-- 底部栏 -->
-				<!-- <div class="right-footer" :style="{backgroundColor:webInfo.bg}"><span>®{{footerText}}</span></div> -->
+				<!-- <div class="right-footer" :style="{backgroundColor:webInfo.bg}"><span>®{{footerText}}</span></div>-->
 			</div>
 			<!-- /右边区域 -->
 		</div>
@@ -137,17 +137,15 @@
             /*
              *可修改的配置信息
              */
-            adminName: config.name,
+            adminName: "admin",
             // 左侧导航栏
             webInfo: {
-                bg: config.webInfo.bg,
-                // bg:'#4f74b4',
-                textColor: config.webInfo.textColor,
-                // textColorActive: "#ffd04b"
-                textColorActive: config.webInfo.textColorActive
+                bg: "#545c64",
+                textColor: "#fff",
+                textColorActive: "#ffd04b"
             },
-            activeIndex: config.activeIndex,
-            footerText: 'mq-admin',
+            activeIndex: 0,
+            footerText: 'admin',
             /*
              *不建议修改的配置信息
              */
