@@ -41,7 +41,7 @@ public class RoleController extends BaseController {
     }
 
     /***
-     * 查询角色列表
+     * 分页查询角色列表
      * @param param
      * @return
      */
@@ -54,6 +54,8 @@ public class RoleController extends BaseController {
         }
         return roleService.getRoleList(page,param);
     }
+
+
 
     /**
      * @Description 新增

@@ -1,6 +1,7 @@
 package com.example.springsecurity.system.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
@@ -33,5 +34,12 @@ public interface RoleMenuDao extends BaseMapper<RoleMenu> {
      */
     int insertOrUpdateBatch(@Param("entities") List<RoleMenu> entities);
 
+    /**
+     * @Description 查询菜单列表
+     * @Author liaoyuangui
+     * @param roleId
+     * @return java.util.List<java.util.Map<java.lang.String,java.lang.String>>
+     **/
+    List<Map<String,Object>> queryListByUserId(@Param("roleId") String roleId);
 }
 

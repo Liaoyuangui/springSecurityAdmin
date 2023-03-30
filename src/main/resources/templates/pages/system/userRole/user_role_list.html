@@ -45,9 +45,10 @@
         </el-table-column>
         <el-table-column
                 label="操作"
-                width="60">
+                width="100">
             <template slot-scope="scope">
-                <el-button type="text" @click="openDialog"  sec:authorize="hasAuthority('system:user:list')" >授权</el-button>
+                <el-button type="success"  @click="openDialog(scope.row)"  sec:authorize="hasAuthority('system:user:list')" >授 权</el-button>
+                <!--<el-button type="success" icon="el-icon-check" circle></el-button>-->
             </template>
         </el-table-column>
     </el-table>
@@ -76,9 +77,9 @@
             <!--左边-->
             <el-aside width="200px" >
                 <el-form :inline="true" :model="user" class="demo-form-inline">
-                    <el-form-item label="当前用户">
+                    <el-form-item label="当前授权用户">
                         <el-input v-model="user.id" type="hidden"></el-input>
-                        <el-input v-model="user.username" disabled></el-input>
+                        <el-input v-model="user.username" disabled style="color: #0d0d0d"></el-input> <!--disabled-->
                     </el-form-item>
                 </el-form>
             </el-aside>
@@ -102,12 +103,12 @@
                     </el-table-column>
                     <el-table-column
                             fixed
-                            prop="roleName"
-                            label="角色名称"
+                            prop="role_name"
+                            label="角色名称列表"
                     >
                     </el-table-column>
                     <!--<el-table-column
-                            prop="roleKey"
+                            prop="role_key"
                             label="权限标识"
                             width="300">
                     </el-table-column>-->
@@ -116,7 +117,7 @@
         </el-container>
         <div slot="footer" class="dialog-footer">
             <el-button @click="closeDialog">取 消</el-button>
-            <el-button type="primary" @click="submitUserForm('userForm')">确 定</el-button>
+            <el-button type="primary" @click="submitForm()">保 存</el-button>
         </div>
     </el-dialog>
 
@@ -200,15 +201,20 @@
             getRoleList(){
                 var that = this;
                 that.loading = true;
-                //获取参数
-                var param = {};
-                param.pageSize= 1000;
-                param.pageNum = 1;
-                axios.post(path+'system/role/list',param).then(
+                axios.get(path+'system/userRole/queryListByUserId?userId='+this.user.id).then(
                     (res) => {
                         that.loading = false;
                         if(res.data.code == '200'){
-                            this.roleData = res.data.data;
+                            var resultData = res.data.data;
+                            this.roleData = resultData;
+                            //已分配的权限默认选中
+                            this.$nextTick(() => {
+                                resultData.forEach((row) => {
+                                    if(row.checked){
+                                        this.$refs.multipleRoleTable.toggleRowSelection(row,true);
+                                    }
+                                });
+                            });
                         }else{
                             this.$message.error(res.data.msg);
                         }
@@ -219,8 +225,9 @@
                         this.$message.error('系统错误');
                     })
             },
-            //授权
-            openDialog(){
+            //授权窗口
+            openDialog(row){
+                this.user = row;
                 this.getRoleList();
                 this.dialogForm = true;
             },
@@ -228,36 +235,32 @@
             closeDialog(){
                 this.dialogForm = false
             },
-            //提交用户添加/编辑表单
-            submitUserForm:function (formName) {
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {
-                        var url = "";
-                        if(this.isUserEdit){
-                            url = path+'user/update'; //修改
+            //提交表单
+            submitForm:function () {
+                var userId = this.user.id; //用户id
+                var select = this.multipleSelection;
+                var role = [];
+                for(var i=0;i<select.length;i++){
+                    role.push(select[i].id);
+                }
+                var data = {};
+                data.userId = userId;
+                data.role = role;
+                axios.post(path+'system/userRole/saveUserRole',data)
+                    .then((res) => {
+                        //console.log(res)
+                        if(res.data.code == '200'){
+                            //this.getUserList();
+                            this.$message.success(res.data.msg);
+                            this.closeDialog();
                         }else{
-                            url = path+'user/add'; //添加
+                            this.$message.error(res.data.msg);
                         }
-                        axios.post(url,this.user)
-                            .then((res) => {
-                                //console.log(res)
-                                if(res.data.code == '200'){
-                                    this.getUserList();
-                                    this.$message.success(res.data.msg);
-                                    this.closeUserDialog();
-                                }else{
-                                    this.$message.error(res.data.msg);
-                                }
-                            })
-                            .catch((err) => {
-                                console.log(err)
-                                this.$message.error('系统错误');
-                            })
-                    } else {
-                        console.log('error add user submit!!');
-                        return false;
-                    }
-                });
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                        this.$message.error('系统错误');
+                    })
             },
 
         }

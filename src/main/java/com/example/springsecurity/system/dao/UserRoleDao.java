@@ -1,6 +1,7 @@
 package com.example.springsecurity.system.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
@@ -33,5 +34,6 @@ public interface UserRoleDao extends BaseMapper<UserRole> {
      */
     int insertOrUpdateBatch(@Param("entities") List<UserRole> entities);
 
+    List<Map<String,String>> queryListByUserId(@Param("userId") String userId);
 }
 

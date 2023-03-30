@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.springsecurity.common.utils.Res.Ret;
+import com.example.springsecurity.common.utils.SecurityUtils;
 import com.example.springsecurity.common.utils.StringUtils;
 import com.example.springsecurity.system.dao.MenuDao;
 import com.example.springsecurity.system.dao.UserDao;
@@ -77,7 +78,15 @@ public class MenuServiceImpl extends ServiceImpl<MenuDao, Menu> implements MenuS
 
     @Override
     public List<Menu> selectMenuByUserId(String userId){
-        List<Menu> menus = menuDao.selectMenuList(userId);
+        boolean admin = SecurityUtils.isAdmin(userId); //是否是超级管理员，超级管理员默认查询所有的菜单
+        List<Menu> menus = new ArrayList<>();
+        if(admin){
+            QueryWrapper<Menu> queryWrapper = new QueryWrapper<>();
+            queryWrapper.orderByAsc("order_num");
+            menus = menuDao.selectList(queryWrapper);
+        }else{
+            menus = menuDao.selectMenuList(userId);
+        }
         return  buildMenuList(menus);
     }
 

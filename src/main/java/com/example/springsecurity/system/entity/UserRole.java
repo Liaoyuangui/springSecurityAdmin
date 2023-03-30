@@ -1,6 +1,8 @@
 package com.example.springsecurity.system.entity;
 
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 
 import java.io.Serializable;
@@ -14,6 +16,8 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class UserRole extends Model<UserRole> {
     //id
+    //指定主键生成策略使用雪花算法（默认策略）
+    @TableId(type = IdType.ASSIGN_ID)
     private String id;
     //用户id
     private String userId;
