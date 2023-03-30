@@ -20,12 +20,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * token验证处理
- *
- * @author ruoyi
  */
 @Component
-public class TokenService
-{
+public class TokenService {
     // 令牌自定义标识,请求头或参数传递的参数名
     @Value("${token.header}")
     private String header;
