@@ -30,7 +30,7 @@
      根据用户id 查询权限标识
     -->
     <select id="selectRolePermissionByUserId" resultType="string">
-        SELECT r.role_key FROM role r,user_role ur WHERE r.id = ur.role_id AND ur.user_id = #{userId}
+        SELECT distinct  r.role_key FROM role r,user_role ur WHERE r.id = ur.role_id AND ur.user_id = #{userId}
     </select>
 
 </mapper>

@@ -77,7 +77,7 @@ public class UserController extends BaseController {
      * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/delete")
-    @PreAuthorize("hasAnyAuthority('system:user:delete')")
+    @PreAuthorize("@ss.hasPermi('system:user:delete')")
     public Ret delete(@RequestBody String userIds){
         if(StringUtils.isEmpty(userIds)){
             return error("请选择删除的数据！");
@@ -100,7 +100,7 @@ public class UserController extends BaseController {
      * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/add")
-    @PreAuthorize("hasAnyAuthority('system:user:add')")
+    @PreAuthorize("@ss.hasPermi('system:user:add')")
     public Ret add(@RequestBody User user){
         return userService.addOrUpdateUser(user);
     }
@@ -113,7 +113,7 @@ public class UserController extends BaseController {
      * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/update")
-    @PreAuthorize("hasAnyAuthority('system:user:update')")
+    @PreAuthorize("@ss.hasPermi('system:user:update')")
     public Ret update(@RequestBody User user){
         return userService.addOrUpdateUser(user);
     }

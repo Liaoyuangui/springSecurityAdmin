@@ -29,7 +29,7 @@
 
     <!--根据用户查询角色-->
     <select id="queryListByUserId" resultType="java.util.Map">
-        select r.*,ur.id as checked from role r
+        select distinct r.*,ur.id as checked from role r
         left join user_role ur on r.id=ur.role_id and ur.user_id=#{userId}
         order by r.id
     </select>

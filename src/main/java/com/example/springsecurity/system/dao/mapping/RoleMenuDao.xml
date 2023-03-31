@@ -29,7 +29,7 @@
 
     <!--根据角色查询菜单列表-->
     <select id="queryListByUserId" resultType="java.util.Map">
-        select m.id,m.menu_name,m.parent_id,m.menu_type,rm.id as checked from menu m
+        select distinct m.id,m.menu_name,m.parent_id,m.menu_type,m.order_num,rm.id as checked from menu m
         left join role_menu rm on m.id=rm.menu_id and rm.role_id=#{roleId}
         order by m.order_num
     </select>

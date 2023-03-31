@@ -232,6 +232,7 @@
             //授权窗口
             openDialog(row){
                 this.role = row;
+                this.isFatherSonld = false; //取消父子联动
                 this.getMenuList();
                 this.dialogForm = true;
             },

@@ -44,14 +44,14 @@
 
     <!--根据用户查询菜单权限标识-->
     <select id="selectMenuPermsByUserId" resultType="java.lang.String">
-        SELECT m.perms FROM role r,user_role ur,menu m,role_menu rm
+        SELECT distinct m.perms FROM role r,user_role ur,menu m,role_menu rm
         WHERE r.id=ur.role_id AND m.id=rm.menu_id AND r.id=rm.role_id
         AND ur.user_id = #{userId}
     </select>
 
     <!--根据登录用户查询菜单列表-->
     <select id="selectMenuList" resultMap="MenuMap">
-        SELECT m.* FROM role r,user_role ur,menu m,role_menu rm
+        SELECT distinct m.* FROM role r,user_role ur,menu m,role_menu rm
         WHERE r.id=ur.role_id AND m.id=rm.menu_id AND r.id=rm.role_id
         AND ur.user_id = #{userId}
         order by order_num

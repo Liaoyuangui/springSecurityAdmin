@@ -105,7 +105,7 @@
                 <el-input v-model="user.username" autocomplete="off"  placeholder="请输入3-12字母或数字作为用户名"></el-input>
             </el-form-item>
             <el-form-item prop="password" label="密码" v-if="!isUserEdit">
-                <el-input v-model="user.password" autocomplete="off"></el-input>
+                <el-input type="password" v-model="user.password" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item prop="nickName" label="昵称"  >
                 <el-input v-model="user.nickName" autocomplete="off"></el-input>
