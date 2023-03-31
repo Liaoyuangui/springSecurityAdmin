@@ -314,7 +314,7 @@
                 }
             },
             getMenuList(){
-                axios.get(path+'system/menu/list').then((res) => {
+                axios.get(path+'system/menu/queryListByUser').then((res) => {
                         if(res.data.code == '200'){
                             this.navs = res.data.data;
                             //console.log(res.data.data)

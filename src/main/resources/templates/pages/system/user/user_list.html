@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="en"
+      xmlns:th="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
 <head>
     <meta charset="UTF-8">
     <title>用户列表</title>
@@ -16,14 +18,14 @@
             <el-input v-model="query.nickName" placeholder="昵称"></el-input>
         </el-form-item>
         <el-form-item>
-            <el-button type="primary" @click="getUserList">查询</el-button>
+            <el-button type="primary" @click="getUserList" sec:authorize="@ss.hasPermi('system:user:query')">查询</el-button>
         </el-form-item>
     </el-form>
     <!--按钮-->
     <el-row>
-        <el-button type="primary" plain icon="el-icon-plus" @click="addUser">新增</el-button>
-        <el-button type="success" plain icon="el-icon-edit" @click="editUser">修改</el-button>
-        <el-button type="danger" plain  icon="el-icon-delete" @click="deleteUser">删除</el-button>
+        <el-button type="primary" plain icon="el-icon-plus" @click="addUser" sec:authorize="@ss.hasPermi('system:user:add')" >新增</el-button>
+        <el-button type="success" plain icon="el-icon-edit" @click="editUser" sec:authorize="@ss.hasPermi('system:user:update')">修改</el-button>
+        <el-button type="danger" plain  icon="el-icon-delete" @click="deleteUser" sec:authorize="@ss.hasPermi('system:user:delete')">删除</el-button>
     </el-row>
     <!--表单-->
     <el-table
@@ -68,14 +70,14 @@
                 label="地址"
                 width="300">
         </el-table-column>
-        <el-table-column
+        <!--<el-table-column
                 label="操作"
                 width="60">
             <template slot-scope="scope">
-               <!-- <el-button type="text" @click="editUser(scope.row)" size="small">编辑</el-button>-->
+               &lt;!&ndash; <el-button type="text" @click="editUser(scope.row)" size="small">编辑</el-button>&ndash;&gt;
                 <el-button type="text"  sec:authorize="hasAuthority('system:user:list')" >授权</el-button>
             </template>
-        </el-table-column>
+        </el-table-column>-->
     </el-table>
     <!--分页-->
     <div class="block">
@@ -100,7 +102,7 @@
         <el-form :model="user" :rules="rules" ref="userForm" label-position="left" label-width="80px">
             <el-input v-model="user.id" autocomplete="off" type="hidden"></el-input>
             <el-form-item prop="username" label="账号" >
-                <el-input v-model="user.username" autocomplete="off"></el-input>
+                <el-input v-model="user.username" autocomplete="off"  placeholder="请输入3-12字母或数字作为用户名"></el-input>
             </el-form-item>
             <el-form-item prop="password" label="密码" v-if="!isUserEdit">
                 <el-input v-model="user.password" autocomplete="off"></el-input>
@@ -129,6 +131,30 @@
 
 </div>
 <script>
+    var validateUser = (rule, value, callback) => {
+        if (value === '') {
+            callback(new Error('用户名不能为空！'));
+        }else {
+            var str = /^[A-Za-z0-9]{3,12}$/;
+            if(!str.test(value)){
+                callback(new Error('用户名请输入3-12字母或数字！'));
+            }else{
+                callback();
+            }
+        }
+    };
+    var validateTel = (rule, value, callback) => {
+        if (value === '') {
+            callback(new Error('手机号码不能为空！'));
+        }else {
+            var str = /^1\d{10}$/;
+            if(!str.test(value)){
+                callback(new Error('请输入11位手机号码！'));
+            }else{
+                callback();
+            }
+        }
+    };
     new Vue({
         el:'#main',
         data() {
@@ -150,11 +176,7 @@
                     address:''
                 },
                 rules: {
-                    username: {
-                        required: true,
-                        message: '请输入用户名',
-                        trigger: 'blur'
-                    },
+                    username: {  required: true,validator: validateUser, trigger: 'blur' } ,
                     password: {
                         required: true,
                         message: '请输入密码',
@@ -166,9 +188,10 @@
                         trigger: 'blur'
                     },
                     phone: {
+                        type: 'number',
                         required: true,
-                        message: '请输入手机号',
-                        trigger: 'blur'
+                        trigger: 'blur',
+                        validator:validateTel
                     },
                     address: {
                         required: true,
@@ -181,7 +204,7 @@
                         trigger: 'blur'
                     },
                 },
-                isUserEdit:true, //是否编辑
+                isUserEdit:false, //是否编辑
                 loading: true, //是否显示loading
                 page:{
                     currentPage:1,
@@ -196,7 +219,7 @@
         },
         computed:{
            getUserEditTitle(){
-               return this.isUserEdit ? '新增用户' : '修改用户';
+               return this.isUserEdit == false ? '新增用户' : '修改用户';
            }
         },
         methods:{

@@ -1,15 +1,12 @@
 package com.example.springsecurity.system.controller;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springsecurity.common.controller.BaseController;
 import com.example.springsecurity.common.utils.JsonUtils;
 import com.example.springsecurity.common.utils.Res.Ret;
 import com.example.springsecurity.common.utils.StringUtils;
 import com.example.springsecurity.system.entity.Menu;
-import com.example.springsecurity.system.entity.User;
 import com.example.springsecurity.system.service.MenuService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +14,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * (Menu)表控制层
@@ -38,7 +37,7 @@ public class MenuController extends BaseController {
      * 视图
      * @return
      */
-    @PreAuthorize("@ss.hasPermi('system:menu:list')")
+    @PreAuthorize("@ss.hasPermi('system:menu:view')")
     @GetMapping("/indexView")
     public ModelAndView indexView(){
         return new ModelAndView("pages/system/menu/menu_list");
@@ -50,7 +49,7 @@ public class MenuController extends BaseController {
      * @return
      */
     @PostMapping("/list")
-    @PreAuthorize("@ss.hasPermi('system:menu:list')")
+    @PreAuthorize("@ss.hasPermi('system:menu:query')")
     public Ret list(@RequestBody Map<String,Object> param){
         Page page = getPageParam(param);
         if(null == page){
@@ -64,8 +63,8 @@ public class MenuController extends BaseController {
     /**
      * 获取当前登录人的菜单列表
      */
-    @GetMapping("/list")
-    public Ret list(){
+    @GetMapping("/queryListByUser")
+    public Ret queryListByUser(){
         //List<Map<String, Object>> menus = menuService.selectMenuList(getUserId());
         List<Menu> menus = menuService.selectMenuByUserId(getUserId());
         return success(menus);
@@ -89,6 +88,7 @@ public class MenuController extends BaseController {
      * @return 新增结果
      */
     @PostMapping("/add")
+    @PreAuthorize("@ss.hasPermi('system:menu:add')")
     public Ret insert(@RequestBody Menu menu) {
         if(menu.getMenuType().equals("M")){
             menu.setParentId("0");
@@ -110,6 +110,7 @@ public class MenuController extends BaseController {
      * @return 修改结果
      */
     @PostMapping("/update")
+    @PreAuthorize("@ss.hasPermi('system:menu:update')")
     public Ret update(@RequestBody Menu menu) {
         if(menu.getMenuType().equals("M")){
             menu.setParentId("0");
@@ -131,6 +132,7 @@ public class MenuController extends BaseController {
      * @return 删除结果
      */
     @PostMapping("/delete")
+    @PreAuthorize("@ss.hasPermi('system:menu:delete')")
     public Ret delete(@RequestBody String idList) {
         String ids = JsonUtils.getString(idList, "idList"); //1,2,3 这种格式
         if(StringUtils.isEmpty(ids)){

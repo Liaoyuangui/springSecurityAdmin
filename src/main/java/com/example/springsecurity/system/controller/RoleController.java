@@ -34,7 +34,7 @@ public class RoleController extends BaseController {
      * 视图
      * @return
      */
-    @PreAuthorize("@ss.hasPermi('system:role:list')")
+    @PreAuthorize("@ss.hasPermi('system:role:view')")
     @GetMapping("/indexView")
     public ModelAndView indexView(){
         return new ModelAndView("pages/system/role/role_list");
@@ -46,7 +46,7 @@ public class RoleController extends BaseController {
      * @return
      */
     @PostMapping("/list")
-    @PreAuthorize("@ss.hasPermi('system:role:list')")
+    @PreAuthorize("@ss.hasPermi('system:role:query')")
     public Ret list(@RequestBody Map<String,Object> param){
         Page page = getPageParam(param);
         if(null == page){
@@ -65,7 +65,7 @@ public class RoleController extends BaseController {
      * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/add")
-    //@PreAuthorize("@ss.hasPermi('system:role:add')")
+    @PreAuthorize("@ss.hasPermi('system:role:add')")
     public Ret add(@RequestBody Role role){
         return roleService.addOrUpdateRole(role);
     }
@@ -78,7 +78,7 @@ public class RoleController extends BaseController {
      * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/update")
-    //@PreAuthorize("@ss.hasPermi('system:role:add')")
+    @PreAuthorize("@ss.hasPermi('system:role:update')")
     public Ret update(@RequestBody Role role){
         return roleService.addOrUpdateRole(role);
     }
@@ -91,7 +91,7 @@ public class RoleController extends BaseController {
      * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/delete")
-    //@PreAuthorize("@ss.hasPermi('system:role:delete')")
+    @PreAuthorize("@ss.hasPermi('system:role:delete')")
     public Ret delete(@RequestBody String idList){
         String ids = JsonUtils.getString(idList, "idList"); //1,2,3 这种格式
         if(StringUtils.isEmpty(ids)){

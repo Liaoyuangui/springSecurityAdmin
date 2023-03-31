@@ -32,7 +32,7 @@ public class UserRoleController extends BaseController {
      * 视图
      * @return
      */
-    @PreAuthorize("@ss.hasPermi('system:userRole:list')")
+    @PreAuthorize("@ss.hasPermi('system:userRole:view')")
     @GetMapping("/indexView")
     public ModelAndView indexView(){
         return new ModelAndView("pages/system/userRole/user_role_list");
@@ -60,7 +60,7 @@ public class UserRoleController extends BaseController {
      * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/saveUserRole")
-   // @PreAuthorize("@ss.hasPermi('system:userRole:save')")
+   @PreAuthorize("@ss.hasPermi('system:userRole:save')")
     public Ret saveUserRole(@RequestBody Map<String,Object> userRole){
         Object userId = userRole.get("userId");
         if(null == userId){

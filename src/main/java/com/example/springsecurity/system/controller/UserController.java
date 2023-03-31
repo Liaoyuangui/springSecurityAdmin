@@ -1,7 +1,6 @@
 package com.example.springsecurity.system.controller;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springsecurity.common.controller.BaseController;
 import com.example.springsecurity.common.utils.JsonUtils;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,29 +31,17 @@ public class UserController extends BaseController {
     private UserService userService;
 
     /**
-     * @Description
+     * @Description 用户管理页面
      * @Author liaoyuangui
-     * @Date 2023/3/17 10:39
      * @param
      * @return org.springframework.web.servlet.ModelAndView
      **/
     @GetMapping("/indexView")
+    @PreAuthorize("@ss.hasPermi('system:user:view')")
     public ModelAndView indexView(){
         return new ModelAndView("pages/system/user/user_list");
     }
 
-
-    /**
-     * 分页查询所有数据
-     *
-     * @param page 分页对象
-     * @param user 查询实体
-     * @return 所有数据
-     */
-    @GetMapping
-    public Ret selectAll(Page<User> page, User user) {
-        return success(this.userService.page(page, new QueryWrapper<>(user)));
-    }
 
     /**
      * 通过主键查询单条数据
@@ -69,14 +55,13 @@ public class UserController extends BaseController {
     }
 
     /**
-     * @Description  查询用户列表
+     * @Description  分页查询查询用户列表
      * @Author liaoyuangui
-     * @Date 2023/3/17 14:23
      * @param
      * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/list")
-    @PreAuthorize("@ss.hasPermi('system:user:list')")
+    @PreAuthorize("@ss.hasPermi('system:user:query')")
     public Ret list(@RequestBody Map<String,Object> param){
         Page page = getPageParam(param);
         if(null == page){
@@ -88,12 +73,11 @@ public class UserController extends BaseController {
     /**
      * @Description  删除用户
      * @Author liaoyuangui
-     * @Date 2023/3/17 15:46
      * @param userIds
      * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/delete")
-    // @PreAuthorize("hasAnyAuthority('system:user:delete')")
+    @PreAuthorize("hasAnyAuthority('system:user:delete')")
     public Ret delete(@RequestBody String userIds){
         if(StringUtils.isEmpty(userIds)){
             return error("请选择删除的数据！");
@@ -112,12 +96,11 @@ public class UserController extends BaseController {
     /**
      * @Description  添加用户
      * @Author liaoyuangui
-     * @Date 2023/3/17 17:32
      * @param user
      * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/add")
-    // @PreAuthorize("hasAnyAuthority('system:user:add')")
+    @PreAuthorize("hasAnyAuthority('system:user:add')")
     public Ret add(@RequestBody User user){
         return userService.addOrUpdateUser(user);
     }
@@ -126,12 +109,11 @@ public class UserController extends BaseController {
     /**
      * @Description 修改用户
      * @Author liaoyuangui
-     * @Date 2023/3/29 15:26
      * @param user
      * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/update")
-    // @PreAuthorize("hasAnyAuthority('system:user:add')")
+    @PreAuthorize("hasAnyAuthority('system:user:update')")
     public Ret update(@RequestBody User user){
         return userService.addOrUpdateUser(user);
     }

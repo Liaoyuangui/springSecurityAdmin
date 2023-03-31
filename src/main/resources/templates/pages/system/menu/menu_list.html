@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
     <head>
         <meta charset="UTF-8">
         <title>菜单列表</title>
@@ -21,14 +22,14 @@
                     </el-select>
                 </el-form-item>-->
                 <el-form-item>
-                    <el-button type="primary" @click="getMenuList">查询</el-button>
+                    <el-button type="primary" @click="getMenuList" sec:authorize="@ss.hasPermi('system:menu:query')">查询</el-button>
                 </el-form-item>
             </el-form>
             <!--按钮-->
             <el-row>
-                <el-button type="primary" plain icon="el-icon-plus" @click="addMenu">新增</el-button>
-                <el-button type="success" plain icon="el-icon-edit" @click="editFrom">修改</el-button>
-                <el-button type="danger" plain  icon="el-icon-delete" @click="deleteMenu">删除</el-button>
+                <el-button type="primary" plain icon="el-icon-plus" @click="addMenu" sec:authorize="@ss.hasPermi('system:menu:add')">新增</el-button>
+                <el-button type="success" plain icon="el-icon-edit" @click="editFrom" sec:authorize="@ss.hasPermi('system:menu:update')">修改</el-button>
+                <el-button type="danger" plain  icon="el-icon-delete" @click="deleteMenu" sec:authorize="@ss.hasPermi('system:menu:delete')">删除</el-button>
             </el-row>
             <!--表单-->
             <el-table
@@ -38,8 +39,8 @@
                     style="width: 100%;margin-top: 5px"
                     @selection-change="handleSelectionChange"
                     v-loading="loading"
+                    :expand-row-keys="expandRow"
                     row-key="id"
-                    default-expand-all
                     :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
             >
                 <el-table-column
@@ -96,12 +97,16 @@
                 <el-table-column
                         prop="createTime"
                         label="创建时间"
-                        width="250">
+                        width="250"
+                        :formatter="formatTime"
+                >
                 </el-table-column>
                 <el-table-column
                         prop="updateTime"
                         label="更新时间"
-                        width="250">
+                        width="250"
+                        :formatter="formatTime"
+                >
                 </el-table-column>
             </el-table>
             <!--分页-->
@@ -237,6 +242,7 @@
                     return {
                         tableData: [], //所有的数据
                         allMenuNotButton: [],  //所有的菜单数据不包含按钮
+                        expandRow:["1"],
                         query:{
                             menuName:'',
                             menuType:''
@@ -264,12 +270,12 @@
                             parentId: {
                                 required: true,
                                 message: '请选择父级菜单',
-                                trigger: 'blur'
+                                trigger: 'change'
                             },
                             parentName: {
                                 required: true,
                                 message: '请选择父级菜单',
-                                trigger: 'blur'
+                                trigger: 'change'
                             },
                             orderNum: {
                                 required: true,
@@ -296,7 +302,7 @@
                         page:{
                             currentPage:1,
                             total:1,
-                            pageSize: 20
+                            pageSize: 100
                         },
                         expandOnClickNode: true, //是否展开下拉树形列表
                         //树形菜单的参数
@@ -381,12 +387,12 @@
                                 parentId: {
                                     required: true,
                                         message: '请选择父级菜单',
-                                        trigger: 'blur'
+                                        trigger: 'change'
                                 },
                                 parentName: {
                                     required: true,
                                         message: '请选择父级菜单',
-                                        trigger: 'blur'
+                                        trigger: 'change'
                                 },
                                 orderNum: {
                                     required: true,
@@ -415,12 +421,12 @@
                                 parentId: {
                                     required: true,
                                     message: '请选择父级菜单',
-                                    trigger: 'blur'
+                                    trigger: 'change'
                                 },
                                 parentName: {
                                     required: true,
                                     message: '请选择父级菜单',
-                                    trigger: 'blur'
+                                    trigger: 'change'
                                 },
                                 orderNum: {
                                     required: true,
@@ -492,6 +498,12 @@
                         }else{
                             return cellValue;
                         }
+                    },
+                    formatTime(row, column, cellValue, index){
+                        if(cellValue != '' && cellValue != undefined && cellValue != null){
+                            return formatDate(cellValue)
+                        }
+                        return cellValue;
                     },
                     //删除
                     deleteMenu(){
@@ -610,6 +622,7 @@
                             remark:'',
                             icon:''
                         },
+                        this.checkMenu();
                         this.openAddDialog();
                     },
                     //编辑

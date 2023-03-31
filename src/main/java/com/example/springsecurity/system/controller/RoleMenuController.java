@@ -35,7 +35,7 @@ public class RoleMenuController extends BaseController {
      * @param
      * @return org.springframework.web.servlet.ModelAndView
      **/
-    @PreAuthorize("@ss.hasPermi('system:roleMenu:list')")
+    @PreAuthorize("@ss.hasPermi('system:roleMenu:view')")
     @RequestMapping("/indexView")
     public ModelAndView view(){
         return new ModelAndView("pages/system/roleMenu/role_menu_list");
@@ -62,7 +62,7 @@ public class RoleMenuController extends BaseController {
      * @return com.example.springsecurity.common.utils.Res.Ret
      **/
     @PostMapping("/saveRoleMenu")
-    // @PreAuthorize("@ss.hasPermi('system:roleMenu:save')")
+    @PreAuthorize("@ss.hasPermi('system:roleMenu:save')")
     public Ret saveRoleMenu(@RequestBody Map<String,Object> roleMenu){
         Object roleId = roleMenu.get("roleId");
         if(null == roleId){
