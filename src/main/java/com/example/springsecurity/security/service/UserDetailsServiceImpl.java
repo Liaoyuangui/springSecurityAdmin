@@ -59,7 +59,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             Set<String> permission = permissionService.getMenuPermission(user);
             //user -> LoginUser
             LoginUser loginUser = new LoginUser(user,permission);
-            System.out.println("***********************"+loginUser.getAuthorities());
+            System.out.println("******登录用户："+loginUser.getUsername()+"，*****权限列表："+loginUser.getAuthorities());
             return loginUser; //返回用户
         }
     }

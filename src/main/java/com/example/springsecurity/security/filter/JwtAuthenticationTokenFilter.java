@@ -56,7 +56,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter{
             tokenService.verifyToken(loginUser);
             /*设置Authentication */
             logger.debug("*****当前登录用户："+loginUser.getUsername() +"*****权限信息："+loginUser.getAuthorities());
-            System.out.println("*****当前登录用户："+loginUser.getUsername() +"；*****权限信息："+loginUser.getAuthorities());
+            //System.out.println("*****当前登录用户："+loginUser.getUsername() +"；*****权限信息："+loginUser.getAuthorities());
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
