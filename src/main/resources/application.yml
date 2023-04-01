@@ -45,7 +45,7 @@ spring:
 mybatis-plus:
   mapper-locations: classpath*:**/mapping/*.xml
   configuration:
-    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     call-setters-on-nulls: true  #值为null key 也要返回
 
 # token配置

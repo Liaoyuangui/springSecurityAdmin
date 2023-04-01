@@ -71,6 +71,13 @@ public class RoleServiceImpl extends ServiceImpl<RoleDao, Role> implements RoleS
             return Ret.error("角色名称不能为空！");
         }
         if(StringUtils.isEmpty(role.getId())){
+            //判断角色名称是否存在
+            QueryWrapper<Role> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("role_name",role.getRoleName());
+            List<Role> roles = roleDao.selectList(queryWrapper);
+            if(roles.size() > 0){
+                return Ret.error("该角色名已存在，请重新输入！");
+            }
             //新增，生成role_key
             SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmsssss");
             String format = sdf.format(new Date());
@@ -79,6 +86,14 @@ public class RoleServiceImpl extends ServiceImpl<RoleDao, Role> implements RoleS
             return Ret.success("添加成功");
         }else{
             //修改
+            //判断角色名称是否存在
+            QueryWrapper<Role> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("role_name",role.getRoleName());
+            queryWrapper.ne("id",role.getId()); //不是当前的这条
+            List<Role> roles = roleDao.selectList(queryWrapper);
+            if(roles.size() > 0){
+                return Ret.error("该角色名已存在，请重新输入！");
+            }
             roleDao.updateById(role);
             return Ret.success("修改成功！");
         }
