@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springsecurity.task.dao.ScheduleTaskDao">
+
+    <resultMap type="com.example.springsecurity.task.entity.ScheduleTask" id="ScheduleTaskMap">
+        <result property="jobId" column="job_id" jdbcType="VARCHAR"/>
+        <result property="beanName" column="bean_name" jdbcType="VARCHAR"/>
+        <result property="methodName" column="method_name" jdbcType="VARCHAR"/>
+        <result property="methodParams" column="method_params" jdbcType="VARCHAR"/>
+        <result property="cronExpression" column="cron_expression" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="jobStatus" column="job_status" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="jobId" useGeneratedKeys="true">
+        insert into spring_security.schedule_task(bean_name, method_name, method_params, cron_expression, remark, job_status, create_time, update_time)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.beanName}, #{entity.methodName}, #{entity.methodParams}, #{entity.cronExpression}, #{entity.remark}, #{entity.jobStatus}, #{entity.createTime}, #{entity.updateTime})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="jobId" useGeneratedKeys="true">
+        insert into spring_security.schedule_task(bean_name, method_name, method_params, cron_expression, remark, job_status, create_time, update_time)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.beanName}, #{entity.methodName}, #{entity.methodParams}, #{entity.cronExpression}, #{entity.remark}, #{entity.jobStatus}, #{entity.createTime}, #{entity.updateTime})
+        </foreach>
+        on duplicate key update
+         bean_name = values(bean_name) , method_name = values(method_name) , method_params = values(method_params) , cron_expression = values(cron_expression) , remark = values(remark) , job_status = values(job_status) , create_time = values(create_time) , update_time = values(update_time)     </insert>
+
+</mapper>
+

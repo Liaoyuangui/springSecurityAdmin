@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="UTF-8">
+    <title>定时任务列表</title>
+    <script th:replace="include"></script>
+</head>
+<body>
+<div id="main">
+    <!--条件-->
+    <el-form :inline="true" :model="query" class="demo-form-inline">
+        <el-form-item label="实例名">
+            <el-input v-model="query.beanName" placeholder="实例名"></el-input>
+        </el-form-item>
+        <el-form-item label="方法名">
+            <el-input v-model="query.methodName" placeholder="方法名"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="getTaskList" sec:authorize="@ss.hasPermi('system:user:query')">查询</el-button>
+        </el-form-item>
+    </el-form>
+    <!--按钮-->
+    <el-row>
+        <el-button type="primary" plain icon="el-icon-plus" @click="add" sec:authorize="@ss.hasPermi('task:scheduleTask:add')" >新增</el-button>
+        <el-button type="success" plain icon="el-icon-edit" @click="edit" sec:authorize="@ss.hasPermi('task:scheduleTask:update')">修改</el-button>
+        <el-button type="danger" plain  icon="el-icon-del" @click="del" sec:authorize="@ss.hasPermi('task:scheduleTask:delete')">删除</el-button>
+        <el-button type="success" plain  icon="el-icon-check" @click="start" sec:authorize="@ss.hasPermi('task:scheduleTask:start')">启动</el-button>
+        <el-button type="warning" plain  icon="el-icon-close" @click="stop" sec:authorize="@ss.hasPermi('task:scheduleTask:stop')">停止</el-button>
+    </el-row>
+    <!--表单-->
+    <el-table
+            ref="multipleTable"
+            :data="tableData"
+            border
+            style="width: 100%;margin-top: 5px"
+            @selection-change="handleSelectionChange"
+            v-loading="loading"
+    >
+        <el-table-column
+                prop="jobId"
+                type="selection"
+                width="55"
+        >
+        </el-table-column>
+        <el-table-column
+                fixed
+                prop="beanName"
+                label="实例名（beanName）"
+                width="200">
+        </el-table-column>
+        <el-table-column
+                prop="methodName"
+                label="方法名"
+                width="200">
+        </el-table-column>
+        <el-table-column
+                prop="methodParams"
+                label="方法的参数"
+                width="150">
+        </el-table-column>
+        <el-table-column
+                prop="jobStatus"
+                label="任务状态"
+                width="100"
+                :formatter="table_status_formatter"
+        >
+        </el-table-column>
+        <el-table-column
+                prop="cronExpression"
+                label="任务执行时间"
+                width="150">
+        </el-table-column>
+        <el-table-column
+                prop="remark"
+                label="备注"
+                width="150">
+        </el-table-column>
+        <el-table-column
+                prop="createTime"
+                label="创建时间"
+                width="250"
+                :formatter="formatTime"
+        >
+        </el-table-column>
+        <el-table-column
+                prop="updateTime"
+                label="更新时间"
+                width="250"
+                :formatter="formatTime"
+        >
+        </el-table-column>
+
+    </el-table>
+    <!--分页-->
+    <div class="block">
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page=page.currentPage
+                :page-sizes="[1,5,10,20,50]"
+                :page-size=page.pageSize
+                layout="total, sizes, prev, pager, next, jumper"
+                :total=page.total>
+        </el-pagination>
+    </div>
+
+    <!--新增dialog,@click="dialogAddForm = true"打开，@click="dialogAddForm = false" 关闭 -->
+    <!-- dialog 表单 -->
+    <el-dialog :title="getEditTitle"
+               :visible.sync="dialogAddForm"
+               @close="closeAddForm"
+    >
+        <el-form :model="ScheduleTask" :rules="rules" ref="taskForm" label-position="left" label-width="80px">
+            <el-input v-model="ScheduleTask.jogId" autocomplete="off" type="hidden"></el-input>
+            <el-form-item prop="beanName" label="实例名" >
+                <el-input v-model="ScheduleTask.beanName" autocomplete="off"  placeholder="请输入实例名"></el-input>
+            </el-form-item>
+            <el-form-item prop="methodName" label="方法名" >
+                <el-input  v-model="ScheduleTask.methodName" autocomplete="off" placeholder="请输入方法名"></el-input>
+            </el-form-item>
+            <el-form-item  prop="methodParams" label="方法参数" >
+                <el-input v-model="ScheduleTask.methodParams" autocomplete="off" placeholder="需要参数请填写"></el-input>
+            </el-form-item>
+            <el-form-item prop="jobStatus" label="状态" >
+                <el-select v-model="ScheduleTask.jobStatus" placeholder="请选择状态">
+                    <el-option label="启动" :value="1" ></el-option>
+                    <el-option label="停止" :value="0" ></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item prop="cronExpression" label="执行时间" >
+                <el-input v-model="ScheduleTask.cronExpression" autocomplete="off" placeholder="请输入cron定时任务执行表达式"></el-input>
+                <a href="https://cron.qqe2.com/" target="_blank">查看cron表达式</a>
+            </el-form-item>
+            <el-form-item prop="remark" label="备注"  >
+                <el-input v-model="ScheduleTask.remark" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="closeAddDialog">取 消</el-button>
+            <el-button type="primary" @click="submitForm('taskForm')">确 定</el-button>
+        </div>
+    </el-dialog>
+
+</div>
+<script>
+    new Vue({
+        el:'#main',
+        data() {
+            return {
+                tableData: [],
+                query:{
+                    beanName:'',
+                    methodName:''
+                },
+                multipleSelection: [], //复选框选择的列
+                dialogAddForm: false, //新增窗口默认关闭
+                ScheduleTask:{
+                    jobId:'',
+                    beanName:'',
+                    methodName:'',
+                    methodParams:'',
+                    cronExpression:'',
+                    remark:'',
+                    jobStatus:0
+                },
+                rules: {
+                    beanName: {
+                        required: true,
+                        message: '请输入后台注入的beanName',
+                        trigger: 'blur'
+                    },
+                    methodName: {
+                        required: true,
+                        message: '请输入执行的方法名',
+                        trigger: 'blur'
+                    },
+                    cronExpression: {
+                        required: true,
+                        message: '请输入定时任务执行时间cron表达式',
+                        trigger: 'blur'
+                    },
+                    jobStatus: {
+                        required: true,
+                        message: '请选择定时任务的状态',
+                        trigger: 'blur'
+                    },
+                },
+                isEdit:false, //是否编辑
+                loading: true, //是否显示loading
+                page:{
+                    currentPage:1,
+                    total:1,
+                    pageSize: 10
+                }
+            }
+        },
+        //加载完成
+        mounted() {
+            this.getTaskList();
+        },
+        computed:{
+            getEditTitle(){
+                return this.isEdit == false ? '新增定时任务' : '修改定时任务';
+            }
+        },
+        methods:{
+            //复选框选中
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            //页数大小改变
+            handleSizeChange(val) {
+                this.page.pageSize = val;
+                this.page.currentPage = 1;
+                this.getTaskList(); //查询一次数据
+            },
+            //当前页码改变
+            handleCurrentChange(val) {
+                this.page.currentPage = val;
+                this.getTaskList(); //查询一次数据
+            },
+            //查询用户列表
+            getTaskList(){
+                var that = this;
+                that.loading = true;
+                //获取参数
+                var param = {};
+                param.beanName = this.query.beanName;
+                param.methodName = this.query.methodName;
+                param.pageSize= this.page.pageSize;
+                param.pageNum = this.page.currentPage;
+                axios.post(path+'task/scheduleTask/list',param).then(
+                    (res) => {
+                        that.loading = false;
+                        if(res.data.code == '200'){
+                            this.page.total = res.data.total;
+                            this.tableData = res.data.data;
+                        }else{
+                            this.$message.error(res.data.msg);
+                        }
+                    })
+                    .catch((err) => {
+                        that.loading = false;
+                        console.log(err)
+                        this.$message.error('系统错误');
+                    })
+            },
+            // 表格状态格式化
+            table_status_formatter(row, column, cellValue, index) {
+                return cellValue == '1' ? '已启动' : '已停止';
+            },
+            //格式时间
+            formatTime(row, column, cellValue, index){
+                if(cellValue != '' && cellValue != undefined && cellValue != null){
+                    return formatDate(cellValue)
+                }
+                return cellValue;
+            },
+            //删除
+            del(){
+                // 方法一，通过selection-change 事件获取
+                var select = this.multipleSelection; //选中的行
+                if(select.length != 1){
+                    return this.$message.warning('请选择一行数据进行删除!');
+                }
+                var id = select[0].jobId;
+                //是否确认删除
+                this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    axios.post(path+'task/scheduleTask/del/'+id)
+                        .then(
+                            (res) => {
+                                if(res.data.code == '200'){
+                                    this.$message.success(res.data.msg);
+                                    this.getTaskList();
+                                }else{
+                                    this.$message.error(res.data.msg);
+                                }
+                            })
+                        .catch((err) => {
+                            console.log(err)
+                            this.$message.error('系统错误');
+                        })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            //启动
+            start(){
+                // 方法一，通过selection-change 事件获取
+                var select = this.multipleSelection; //选中的行
+                if(select.length != 1){
+                    return this.$message.warning('请选择一行数据进行启动!');
+                }
+                var id = select[0].jobId;
+                var status = select[0].jobStatus; //状态
+                if(status == 1){
+                    return this.$message.warning('该任务已经启动，无需再次启动!');
+                }
+                this.$confirm('是否启动该定时任务?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    axios.post(path+'task/scheduleTask/start/'+id)
+                        .then(
+                            (res) => {
+                                if(res.data.code == '200'){
+                                    this.$message.success(res.data.msg);
+                                    this.getTaskList();
+                                }else{
+                                    this.$message.error(res.data.msg);
+                                }
+                            })
+                        .catch((err) => {
+                            console.log(err)
+                            this.$message.error('系统错误');
+                        })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消'
+                    });
+                });
+            },
+            //停止
+            stop(){
+                // 方法一，通过selection-change 事件获取
+                var select = this.multipleSelection; //选中的行
+                if(select.length != 1){
+                    return this.$message.warning('请选择一行数据进行停止!');
+                }
+                var id = select[0].jobId;
+                var status = select[0].jobStatus; //状态
+                if(status == 0){
+                    return this.$message.warning('该任务已经停止，无需再次停止!');
+                }
+                this.$confirm('是否停止该定时任务?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    axios.post(path+'task/scheduleTask/stop/'+id)
+                        .then(
+                            (res) => {
+                                if(res.data.code == '200'){
+                                    this.$message.success(res.data.msg);
+                                    this.getTaskList();
+                                }else{
+                                    this.$message.error(res.data.msg);
+                                }
+                            })
+                        .catch((err) => {
+                            console.log(err)
+                            this.$message.error('系统错误');
+                        })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消'
+                    });
+                });
+            },
+            //打开新增/编辑窗口
+            openDialog(){
+                this.dialogAddForm = true
+            },
+            //关闭新增/编辑窗口
+            closeAddDialog(){
+                this.closeAddForm();
+            },
+            //提交添加/编辑表单
+            submitForm:function (formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var url = "";
+                        if(this.isEdit){
+                            url = path+'task/scheduleTask/update'; //修改
+                        }else{
+                            url = path+'task/scheduleTask/add'; //添加
+                        }
+                        axios.post(url,this.ScheduleTask)
+                            .then((res) => {
+                                //console.log(res)
+                                if(res.data.code == '200'){
+                                    this.getTaskList();
+                                    this.$message.success(res.data.msg);
+                                    this.closeAddDialog();
+                                }else{
+                                    this.$message.error(res.data.msg);
+                                }
+                            })
+                            .catch((err) => {
+                                console.log(err)
+                                this.$message.error('系统错误');
+                            })
+                    } else {
+                        console.log('error add/update task submit!!');
+                        return false;
+                    }
+                });
+            },
+            //新增
+            add(){
+                this.isEdit = false;
+                this.ScheduleTask = {
+                    jobId:'',
+                    beanName:'',
+                    methodName:'',
+                    methodParams:'',
+                    cronExpression:'',
+                    remark:'',
+                    jobStatus:0
+                },
+                this.openDialog();
+            },
+            //编辑用户
+            edit(row){
+                // console.log(row)
+                var select = this.multipleSelection; //选中的行
+                if(select.length != 1){
+                    return this.$message.warning('请选择一行数据进行编辑!');
+                }
+                this.isEdit = true;
+                this.ScheduleTask = select[0];
+                //console.log("update",this.user)
+                this.openDialog();
+            },
+            //点击右上角的X关闭弹窗
+            closeAddForm(){
+                this.isEdit = false;
+                this.dialogAddForm = false //关闭
+            },
+            //关闭窗口前的回调
+            beforeCloseaddDialog(){
+
+            }
+        }
+    })
+</script>
+</body>
+</html>
