@@ -1,5 +1,6 @@
 package com.example.springsecurity.security.config;
 
+import com.example.springsecurity.security.provider.WxAuthenticationProvider;
 import com.example.springsecurity.security.service.UserDetailsServiceImpl;
 import com.example.springsecurity.security.filter.JwtAuthenticationTokenFilter;
 import com.example.springsecurity.security.handle.AuthenticationEntryPointImpl;
@@ -9,6 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,6 +27,9 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.filter.CorsFilter;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -64,32 +71,56 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource
     private CorsFilter corsFilter;
 
+    //配置provider，有多种登录方式就配置多个
+
     /**
-     * 解决 无法直接注入 AuthenticationManager
-     *
+     * 配置provider(DaoAuthenticationProvider:security框架默认实现) 用户名密码的一套
+     * @return
+     */
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider(){
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        daoAuthenticationProvider.setUserDetailsService(userService);
+        return daoAuthenticationProvider;
+    }
+
+    /**
+     * 配置provider(WxAuthenticationProvider:自己定义类 ) 微信的一套（根据openid直接登入系统）
+     * @return
+     */
+    @Bean
+    public WxAuthenticationProvider wxAuthenticationProvider(){
+        WxAuthenticationProvider wxAuthenticationProvider = new WxAuthenticationProvider();
+        wxAuthenticationProvider.setUserDetailsService(userService);
+        return wxAuthenticationProvider;
+    }
+
+
+    /**
+     * 定义认证管理器 AuthenticationManager
+     * 把用户名密码登录、微信登录添加进来
      * @return
      * @throws Exception
      */
-    @Bean
+    @Bean(name="sysAuthenticationManager")
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception{
-        return super.authenticationManagerBean();
+        //return super.authenticationManagerBean(); //只有用户名和密码登录，默认返回即可
+        //有多个Provider 添加到list中
+        List<AuthenticationProvider> providers = new ArrayList<>();
+        providers.add(daoAuthenticationProvider());
+        providers.add(wxAuthenticationProvider());
+        ProviderManager authenticationManager = new ProviderManager(providers);
+        //不擦除认证密码，擦除会导致TokenBasedRememberMeServices因为找不到Credentials再调用UserDetailsService而抛出UsernameNotFoundException
+        authenticationManager.setEraseCredentialsAfterAuthentication(false);
+        return  authenticationManager;
     }
 
     // 指定密码的加密方式，不然定义认证规则那里会报错
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new PasswordEncoder() {
-            @Override
-            public String encode(CharSequence charSequence) {
-                return charSequence.toString();
-            }
-
-            @Override
-            public boolean matches(CharSequence charSequence, String s) {
-                return Objects.equals(charSequence.toString(), s);
-            }
-        };
+        return new BCryptPasswordEncoder();
     }
 
     //全家过滤（不会走过滤器链），配置忽略掉的 URL 地址,一般用于js,css,图片等静态资源
@@ -105,7 +136,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         //配置service，该service需要实现UserDetailsService接口, 然后登录的时候会自动去查询该接口中的方法
         //数据库中的权限数据需以ROLE_ 开头， 如vip1 -> ROLE_vip1
-        auth.userDetailsService(userService).passwordEncoder(new BCryptPasswordEncoder());
+        auth.userDetailsService(userService).passwordEncoder(passwordEncoder());
 
     }
 
@@ -140,7 +171,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 过滤请求
                 .authorizeRequests()
                 // 对于登录login接口 toLogin登录页面 注册register 验证码captchaImage 允许匿名访问
-                .antMatchers("/","/login", "/register","/toLogin", "/captchaImage").permitAll()
+                .antMatchers("/","/login","/wxLogin", "/register","/toLogin", "/captchaImage").permitAll()
                 // 静态资源，可匿名访问
                 //.antMatchers("/", "/*.html", "/**/*.html", "/**/*.css", "/**/*.js", "/static/**","**/*.json").permitAll()
                // .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/*/api-docs", "/druid/**").permitAll()

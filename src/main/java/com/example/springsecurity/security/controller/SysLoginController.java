@@ -64,4 +64,19 @@ public class SysLoginController {
         ret.set(Constants.TOKEN, token);
         return ret;
     }
+
+    /**
+     * 微信登录方法
+     *
+     * @param user 登录信息
+     * @return 结果
+     */
+    @PostMapping("/wxLogin")
+    public Ret wxLogin(@RequestBody User user){
+        Ret ret = Ret.success();
+        // 用openId 进行登录
+        String token = loginService.wxLogin(user.getOpenId());
+        ret.set(Constants.TOKEN, token);
+        return ret;
+    }
 }

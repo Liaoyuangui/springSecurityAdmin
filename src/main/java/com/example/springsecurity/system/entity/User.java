@@ -1,6 +1,7 @@
 package com.example.springsecurity.system.entity;
 
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 
 import java.io.Serializable;
@@ -15,6 +16,9 @@ import java.io.Serializable;
 public class User extends Model<User> {
     //主键
     private String id;
+    //微信的openId
+    @TableField(exist = false)
+    private String openId;
     //用户名
     private String username;
     //密码
@@ -83,6 +87,14 @@ public class User extends Model<User> {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
+    }
+
+    public String getOpenId() {
+        return openId;
+    }
+
+    public void setOpenId(String openId) {
+        this.openId = openId;
     }
 
     /**
